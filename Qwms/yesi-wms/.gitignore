@@ -1,0 +1,10 @@
+node_modules/
+.data/
+public/
+*.log
+.env
+.env.local
+coverage/
+dist/
+.data-test/
+.data-console/
