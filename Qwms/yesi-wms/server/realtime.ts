@@ -1,19 +1,196 @@
-import { WebSocketServer, WebSocket } from 'ws';
+/**
+ * Authenticated realtime channel.
+ *
+ * A single-use 30-second ticket (issued over the session-authenticated REST
+ * API) authenticates the upgrade. Clients then receive a sequence-numbered
+ * event stream, replayed from their last cursor, filtered by role. The client
+ * treats a gap or `resync` as a signal to refetch the REST snapshot, so a lost
+ * socket can never leave stale state behind.
+ */
 import type { FastifyInstance } from 'fastify';
-import { pool, hash, fail } from './db.js';
-import { config, permissions, type Role } from './config.js';
+import { WebSocketServer, type WebSocket } from 'ws';
+import { consumeWsTicket } from './auth.js';
+import { db, many } from './db/index.js';
+import { onEvent, type DomainEvent } from './bus.js';
+import { config, can, type Role } from './config.js';
 import { metrics } from './metrics.js';
-import { visible } from './api.js';
-export function attachRealtime(app:FastifyInstance){
- const wss=new WebSocketServer({noServer:true,maxPayload:4096});const clients=new Map<WebSocket,{userId:string;role:Role;expires:Date}>();
- app.server.on('upgrade',(req,socket,head)=>{const u=new URL(req.url||'','http://internal');const origin=req.headers.origin;const preview=config.development&&origin&&/^https:\/\/5173-[a-z0-9-]+\.e2b\.app$/.test(origin);const local=config.development&&origin&&/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);if(u.pathname!=='/ws'||(origin&&origin!==config.origin&&!preview&&!local)){socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');socket.destroy();return;}wss.handleUpgrade(req,socket,head,ws=>wss.emit('connection',ws,req));});
- wss.on('connection',(ws)=>{let authenticated=false;const timeout=setTimeout(()=>{if(!authenticated)ws.close(4001,'Ticket timeout');},5000);
- ws.on('message',async data=>{try{if(authenticated){const m=JSON.parse(data.toString());if(m.type==='ping')ws.send(JSON.stringify({type:'pong'}));return;}const m=JSON.parse(data.toString());if(typeof m.ticket!=='string'||m.ticket.length>100)throw new Error('Invalid ticket');const r=await pool.query('DELETE FROM ws_tickets t USING users u WHERE t.token_hash=$1 AND t.user_id=u.id AND t.expires_at>now() AND u.active RETURNING u.id,u.role',[hash(m.ticket)]);if(!r.rowCount){ws.close(4001,'Invalid or used ticket');return;}authenticated=true;clearTimeout(timeout);const session=await pool.query('SELECT expires_at FROM sessions s JOIN users u ON u.id=s.user_id WHERE u.id=$1 AND NOT s.mfa_pending AND s.expires_at>now() ORDER BY s.expires_at DESC LIMIT 1',[r.rows[0].id]);if(!session.rowCount){ws.close(4001,'Session expired');return;}clients.set(ws,{userId:r.rows[0].id,role:r.rows[0].role,expires:new Date(session.rows[0].expires_at)});metrics.connections.set(clients.size);const seq=(await pool.query('SELECT coalesce(max(seq),0)::int AS seq FROM outbox')).rows[0].seq;ws.send(JSON.stringify({type:'ready',sequence:seq,topics:'read',heartbeat_seconds:20}));}catch{ws.close(4002,'Invalid realtime message');}});
- ws.on('close',()=>{clearTimeout(timeout);clients.delete(ws);metrics.connections.set(clients.size);});ws.on('error',()=>ws.close());});
- const listener=(client:any)=>{client.on('notification',async(msg:any)=>{try{const r=await pool.query('SELECT seq,id,topic,payload,created_at FROM outbox WHERE seq=$1',[Number(msg.payload)]);const e=r.rows[0];if(!e)return;for(const [ws,c] of clients){if(c.expires.getTime()<Date.now()){ws.close(4001,'Session expired');continue;}if(ws.readyState===WebSocket.OPEN&&visible(e.topic,c.role)&&ws.bufferedAmount<1048576)ws.send(JSON.stringify({type:'event',...e}));else if(ws.bufferedAmount>=1048576)ws.close(4003,'Backpressure');}}catch(e){console.error(JSON.stringify({level:'error',component:'notification',message:String(e)}));}});client.on('error',(e:unknown)=>console.error(JSON.stringify({level:'error',component:'realtime-listener',message:String(e)})));};
- let stopped=false;let active:any;
- async function listen(){while(!stopped){const client=await pool.connect();active=client;try{await client.query('LISTEN yesi_events');listener(client);await new Promise<void>(resolve=>client.once('end',()=>resolve()));}catch(e){console.error(JSON.stringify({level:'error',component:'listen',message:String(e)}));}finally{client.removeAllListeners();client.release();}if(!stopped)await new Promise(r=>setTimeout(r,2000));}}
- const heartbeat=setInterval(()=>{for(const [ws,c] of clients){if(c.expires.getTime()<Date.now())ws.close(4001,'Session expired');else if(ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'heartbeat',server_time:new Date().toISOString()}));}},20000);
- app.addHook('onClose',async()=>{stopped=true;clearInterval(heartbeat);for(const ws of clients.keys())ws.close(1001,'Server shutdown');wss.close();active?.release(true);});
- return {listen};
+
+const MAX_BUFFER = 2 * 1024 * 1024;
+const REPLAY_LIMIT = 500;
+
+export function eventVisible(topic: string, role: string): boolean {
+  if (topic.startsWith('finance.') || topic.startsWith('erp.')) return role === 'admin' || role === 'finance';
+  if (topic.startsWith('audit.')) return role === 'admin';
+  return can(role, 'read');
+}
+
+type ClientState = { ws: WebSocket; role: Role; userId: string; alive: boolean; cursor: number };
+
+export function attachRealtime(app: FastifyInstance) {
+  const wss = new WebSocketServer({ noServer: true, maxPayload: 64 * 1024 });
+  const clients = new Set<ClientState>();
+
+  const send = (client: ClientState, message: unknown) => {
+    if (client.ws.readyState !== client.ws.OPEN) return;
+    if (client.ws.bufferedAmount > MAX_BUFFER) {
+      client.ws.close(1013, 'backpressure');
+      return;
+    }
+    client.ws.send(JSON.stringify(message));
+    metrics.wsEvents.inc();
+  };
+
+  const unsubscribe = onEvent((event: DomainEvent) => {
+    for (const client of clients) {
+      if (!eventVisible(event.topic, client.role)) continue;
+      client.cursor = Math.max(client.cursor, event.seq);
+      send(client, {
+        type: 'event',
+        seq: event.seq,
+        id: event.id,
+        topic: event.topic,
+        aggregate_type: event.aggregate_type,
+        aggregate_id: event.aggregate_id,
+        payload: event.payload,
+        created_at: event.created_at,
+      });
+    }
+  });
+
+  app.server.on('upgrade', (request, socket, head) => {
+    let pathname = '';
+    try {
+      pathname = new URL(request.url || '/', 'http://localhost').pathname;
+    } catch {
+      socket.destroy();
+      return;
+    }
+    if (pathname !== '/ws') {
+      socket.destroy();
+      return;
+    }
+    const origin = request.headers.origin;
+    if (origin && config.appOrigin && origin !== config.appOrigin) {
+      try {
+        const incoming = new URL(origin);
+        const expected = new URL(config.appOrigin);
+        if (incoming.host !== expected.host && !(config.development && /\.e2b\.app$/.test(incoming.hostname))) {
+          socket.destroy();
+          return;
+        }
+      } catch {
+        socket.destroy();
+        return;
+      }
+    }
+    wss.handleUpgrade(request, socket, head, (ws) => wss.emit('connection', ws, request));
+  });
+
+  wss.on('connection', (ws: WebSocket) => {
+    let state: ClientState | null = null;
+    const timer = setTimeout(() => {
+      if (!state) ws.close(4001, 'authentication timeout');
+    }, 5_000);
+
+    ws.on('message', async (raw) => {
+      let message: any;
+      try {
+        message = JSON.parse(String(raw));
+      } catch {
+        ws.close(4002, 'invalid message');
+        return;
+      }
+      if (!state) {
+        if (message.type !== 'authenticate' || typeof message.ticket !== 'string') {
+          ws.close(4001, 'ticket required');
+          return;
+        }
+        clearTimeout(timer);
+        const identity = await consumeWsTicket(message.ticket);
+        if (!identity) {
+          ws.close(4001, 'invalid ticket');
+          return;
+        }
+        const lastSeq = Number.isInteger(message.last_seq) ? Math.max(0, message.last_seq) : 0;
+        state = { ws, role: identity.role as Role, userId: identity.user_id, alive: true, cursor: lastSeq };
+        clients.add(state);
+        metrics.wsConnections.set(clients.size);
+
+        const head = await many<{ seq: number }>(db, 'SELECT coalesce(max(seq),0)::int AS seq FROM outbox');
+        const sequence = Number(head[0]?.seq || 0);
+        if (sequence - lastSeq > REPLAY_LIMIT) {
+          send(state, { type: 'resync', sequence });
+        } else {
+          const replay = await many<any>(
+            db,
+            `SELECT seq, id, topic, aggregate_type, aggregate_id, payload, created_at
+             FROM outbox WHERE seq > $1 ORDER BY seq LIMIT ${REPLAY_LIMIT}`,
+            [lastSeq],
+          );
+          for (const event of replay) {
+            if (!eventVisible(event.topic, identity.role)) continue;
+            send(state, {
+              type: 'event',
+              seq: Number(event.seq),
+              id: event.id,
+              topic: event.topic,
+              aggregate_type: event.aggregate_type,
+              aggregate_id: event.aggregate_id,
+              payload: event.payload,
+              created_at: new Date(event.created_at).toISOString(),
+            });
+          }
+        }
+        state.cursor = Math.max(state.cursor, sequence);
+        send(state, { type: 'ready', sequence, role: identity.role, user_id: identity.user_id });
+        return;
+      }
+      if (message.type === 'ping') {
+        state.alive = true;
+        send(state, { type: 'pong', sequence: state.cursor });
+      }
+    });
+
+    ws.on('pong', () => {
+      if (state) state.alive = true;
+    });
+
+    ws.on('close', () => {
+      clearTimeout(timer);
+      if (state) {
+        clients.delete(state);
+        metrics.wsConnections.set(clients.size);
+      }
+    });
+
+    ws.on('error', () => ws.terminate());
+  });
+
+  const heartbeat = setInterval(() => {
+    for (const client of clients) {
+      if (!client.alive) {
+        client.ws.terminate();
+        clients.delete(client);
+        continue;
+      }
+      client.alive = false;
+      try {
+        client.ws.ping();
+      } catch {
+        client.ws.terminate();
+      }
+    }
+    metrics.wsConnections.set(clients.size);
+  }, 30_000);
+
+  const close = async () => {
+    clearInterval(heartbeat);
+    unsubscribe();
+    for (const client of clients) client.ws.close(1001, 'server shutting down');
+    clients.clear();
+    await new Promise<void>((resolve) => wss.close(() => resolve()));
+  };
+
+  app.addHook('onClose', close);
+  return { clients: () => clients.size, close };
 }
