@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YESI-FULFILLMENT— Fulfillment Cloud</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-400-normal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-500-normal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-600-normal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-700-normal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-800-normal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono@latest/latin-400-normal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono@latest/latin-600-normal.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.6.1/dist/chart.umd.min.js"></script>
+<style>
+:root, [data-theme="dark"]{
+  --bg:#070c08; --bg2:#0a120b; --panel:#0e1610; --panel2:#141f15; --panel3:#1a2a1b;
+  --border:#1d2c1e; --border2:#2c422e;
+  --text:#e9f5e9; --muted:#8fa98f; --faint:#5f7560;
+  --accent:#a3e635; --accent2:#84cc16; --accent-ink:#0c1a05;
+  --accent-soft:rgba(163,230,53,.10); --accent-soft2:rgba(163,230,53,.18);
+  --good:#4ade80; --warn:#fbbf24; --bad:#f87171; --info:#38bdf8; --violet:#a78bfa;
+  --shadow:0 8px 30px rgba(0,0,0,.45);
+  --grid-line:rgba(163,230,53,.05);
+}
+[data-theme="light"]{
+  --bg:#f2f7ef; --bg2:#e9f1e4; --panel:#ffffff; --panel2:#f5faf1; --panel3:#ecf4e6;
+  --border:#dbe7d3; --border2:#c3d6b8;
+  --text:#152410; --muted:#54694f; --faint:#7d9276;
+  --accent:#65a30d; --accent2:#84cc16; --accent-ink:#ffffff;
+  --accent-soft:rgba(101,163,13,.10); --accent-soft2:rgba(101,163,13,.18);
+  --good:#16a34a; --warn:#d97706; --bad:#dc2626; --info:#0284c7; --violet:#7c3aed;
+  --shadow:0 8px 30px rgba(30,60,20,.12);
+  --grid-line:rgba(60,120,40,.06);
+}
+*{scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:8px}::-webkit-scrollbar-track{background:transparent}
+html,body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif}
+.mono{font-family:'JetBrains Mono',monospace}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:16px}
+.panel-2{background:var(--panel2);border:1px solid var(--border);border-radius:12px}
+.hair{border-color:var(--border)}
+.text-muted{color:var(--muted)}.text-faint{color:var(--faint)}.text-acc{color:var(--accent)}
+.bg-grid{background-image:linear-gradient(var(--grid-line) 1px,transparent 1px),linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);background-size:34px 34px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.02em;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:all .18s;border:1px solid transparent;user-select:none}
+.btn-primary{background:var(--accent);color:var(--accent-ink);box-shadow:0 0 0 0 var(--accent-soft2)}
+.btn-primary:hover{filter:brightness(1.1);box-shadow:0 0 24px var(--accent-soft2);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--text);border-color:var(--border2)}
+.btn-ghost:hover{background:var(--accent-soft);border-color:var(--accent)}
+.btn-soft{background:var(--accent-soft);color:var(--accent)}
+.btn-soft:hover{background:var(--accent-soft2)}
+.input{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:9px 12px;font-size:13px;color:var(--text);outline:none;transition:border .15s;width:100%}
+.input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.input::placeholder{color:var(--faint)}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;font-size:13.5px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;position:relative}
+.nav-item:hover{color:var(--text);background:var(--panel2)}
+.nav-item.active{color:var(--accent);background:var(--accent-soft);font-weight:600}
+.nav-item.active::before{content:"";position:absolute;left:-14px;top:20%;height:60%;width:3px;border-radius:3px;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.kpi-card{position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.kpi-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.kpi-card::after{content:"";position:absolute;inset:0;background:radial-gradient(400px 100px at 100% 0%,var(--accent-soft),transparent 60%);pointer-events:none}
+table.dt{width:100%;border-collapse:collapse;font-size:13px}
+table.dt th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:600;text-align:left;padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap}
+table.dt th:hover{color:var(--accent)}
+table.dt td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+table.dt tbody tr{transition:background .12s;cursor:pointer}
+table.dt tbody tr:hover{background:var(--accent-soft)}
+.bar-track{background:var(--panel3);border-radius:99px;height:6px;overflow:hidden}
+.bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .6s}
+.switch{width:38px;height:21px;border-radius:99px;background:var(--panel3);border:1px solid var(--border2);position:relative;cursor:pointer;transition:all .2s;flex:none}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:var(--muted);transition:all .2s}
+.switch.on{background:var(--accent);border-color:var(--accent)}
+.switch.on::after{left:19px;background:var(--accent-ink)}
+.drawer{position:fixed;top:0;right:0;height:100vh;width:min(480px,94vw);background:var(--panel);border-left:1px solid var(--border2);z-index:70;transform:translateX(105%);transition:transform .35s cubic-bezier(.22,1,.36,1);box-shadow:var(--shadow);display:flex;flex-direction:column}
+.drawer.open{transform:translateX(0)}
+.modal-wrap{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;background:rgba(3,8,4,.65);backdrop-filter:blur(6px);padding:16px}
+.modal-wrap.open{display:flex}
+.modal{background:var(--panel);border:1px solid var(--border2);border-radius:18px;width:min(520px,96vw);max-height:90vh;overflow:auto;box-shadow:var(--shadow);animation:pop .25s cubic-bezier(.22,1,.36,1)}
+@keyframes pop{from{transform:scale(.94) translateY(10px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.toast{background:var(--panel2);border:1px solid var(--border2);border-left:3px solid var(--accent);border-radius:12px;padding:12px 16px;box-shadow:var(--shadow);font-size:13px;display:flex;gap:10px;align-items:center;animation:slidein .3s cubic-bezier(.22,1,.36,1);max-width:360px}
+@keyframes slidein{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
+.pulse-dot{width:8px;height:8px;border-radius:50%;background:var(--good);position:relative}
+.pulse-dot::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1px solid var(--good);animation:pulse 1.6s infinite}
+@keyframes pulse{0%{transform:scale(.6);opacity:1}100%{transform:scale(1.4);opacity:0}}
+.kanban-card{background:var(--panel2);border:1px solid var(--border2);border-radius:12px;padding:12px;cursor:grab;transition:all .18s}
+.kanban-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--shadow)}
+.kanban-card.dragging{opacity:.45;cursor:grabbing}
+.kanban-col{background:var(--bg2);border:1px solid var(--border);border-radius:14px;min-height:200px;transition:all .15s}
+.kanban-col.over{border-color:var(--accent);background:var(--accent-soft)}
+.loc-cell{aspect-ratio:1;border-radius:4px;cursor:pointer;transition:transform .12s,box-shadow .12s;border:1px solid transparent}
+.loc-cell:hover{transform:scale(1.35);z-index:5;position:relative;border-color:var(--accent);box-shadow:0 0 10px var(--accent-soft2)}
+.view{display:none;animation:fadein .3s ease}
+.view.active{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+body.compact table.dt td{padding:7px 12px}
+body.compact table.dt th{padding:8px 12px}
+#login{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:opacity .5s,visibility .5s}
+#login.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.login-orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.35;animation:float 9s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.08)}}
+.dropdown{position:absolute;top:calc(100% + 10px);right:0;width:340px;background:var(--panel);border:1px solid var(--border2);border-radius:14px;box-shadow:var(--shadow);z-index:60;display:none;overflow:hidden}
+.dropdown.open{display:block;animation:pop .2s}
+#cmdk{position:fixed;inset:0;z-index:100;display:none;background:rgba(3,8,4,.6);backdrop-filter:blur(6px);align-items:flex-start;justify-content:center;padding-top:12vh}
+#cmdk.open{display:flex}
+.cmd-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;cursor:pointer;font-size:13.5px;color:var(--muted)}
+.cmd-item.sel,.cmd-item:hover{background:var(--accent-soft);color:var(--text)}
+.timeline-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--border2);background:var(--panel);flex:none;margin-top:4px}
+.timeline-dot.done{border-color:var(--accent);background:var(--accent)}
+.glow-text{text-shadow:0 0 24px var(--accent-soft2)}
+@media(max-width:1023px){#sidebar{position:fixed;z-index:90;left:0;top:0;height:100vh;transform:translateX(-105%);transition:transform .3s}#sidebar.mobile-open{transform:none;box-shadow:var(--shadow)}}
+</style>
+</head>
+<body class="bg-grid">
+
+<!-- ============ LOGIN ============ -->
+<div id="login">
+  <div class="login-orb" style="width:420px;height:420px;background:#a3e635;top:-80px;left:-60px"></div>
+  <div class="login-orb" style="width:360px;height:360px;background:#22c55e;bottom:-100px;right:-40px;animation-delay:2s"></div>
+  <div class="login-orb" style="width:220px;height:220px;background:#84cc16;top:40%;right:22%;animation-delay:4s"></div>
+  <div class="relative w-full max-w-5xl mx-4 grid lg:grid-cols-2 gap-8 items-center">
+    <div class="hidden lg:block">
+      <svg viewBox="0 0 480 300" class="w-full">
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a3e635" stop-opacity=".9"/><stop offset="1" stop-color="#a3e635" stop-opacity=".15"/></linearGradient>
+          <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a2a1b"/><stop offset="1" stop-color="#0e1610"/></linearGradient>
+        </defs>
+        <rect x="10" y="250" width="460" height="6" rx="3" fill="#1d2c1e"/>
+        <g>
+          <rect x="40" y="90" width="120" height="160" rx="8" fill="url(#g2)" stroke="#2c422e"/>
+          <rect x="52" y="104" width="96" height="34" rx="5" fill="#141f15" stroke="#a3e635" stroke-opacity=".4"/><rect x="58" y="112" width="30" height="18" rx="3" fill="url(#g1)" opacity=".7"/><rect x="94" y="112" width="20" height="18" rx="3" fill="#2c422e"/><rect x="120" y="112" width="22" height="18" rx="3" fill="#2c422e"/>
+          <rect x="52" y="148" width="96" height="34" rx="5" fill="#141f15" stroke="#2c422e"/><rect x="58" y="156" width="20" height="18" rx="3" fill="#2c422e"/><rect x="84" y="156" width="30" height="18" rx="3" fill="url(#g1)" opacity=".5"/><rect x="120" y="156" width="22" height="18" rx="3" fill="#2c422e"/>
+          <rect x="52" y="192" width="96" height="34" rx="5" fill="#141f15" stroke="#2c422e"/><rect x="58" y="200" width="24" height="18" rx="3" fill="#2c422e"/><rect x="88" y="200" width="24" height="18" rx="3" fill="#2c422e"/><rect x="118" y="200" width="24" height="18" rx="3" fill="url(#g1)" opacity=".6"/>
+        </g>
+        <g>
+          <rect x="190" y="60" width="120" height="190" rx="8" fill="url(#g2)" stroke="#2c422e"/>
+          <rect x="202" y="74" width="96" height="34" rx="5" fill="#141f15" stroke="#a3e635" stroke-opacity=".4"/><rect x="208" y="82" width="24" height="18" rx="3" fill="url(#g1)" opacity=".8"/><rect x="238" y="82" width="24" height="18" rx="3" fill="#2c422e"/><rect x="268" y="82" width="24" height="18" rx="3" fill="url(#g1)" opacity=".45"/>
+          <rect x="202" y="118" width="96" height="34" rx="5" fill="#141f15" stroke="#2c422e"/><rect x="208" y="126" width="20" height="18" rx="3" fill="#2c422e"/><rect x="234" y="126" width="28" height="18" rx="3" fill="url(#g1)" opacity=".6"/><rect x="268" y="126" width="24" height="18" rx="3" fill="#2c422e"/>
+          <rect x="202" y="162" width="96" height="34" rx="5" fill="#141f15" stroke="#2c422e"/><rect x="208" y="170" width="26" height="18" rx="3" fill="url(#g1)" opacity=".5"/><rect x="240" y="170" width="20" height="18" rx="3" fill="#2c422e"/><rect x="266" y="170" width="26" height="18" rx="3" fill="#2c422e"/>
+          <rect x="202" y="206" width="96" height="34" rx="5" fill="#141f15" stroke="#2c422e"/><rect x="208" y="214" width="22" height="18" rx="3" fill="#2c422e"/><rect x="236" y="214" width="26" height="18" rx="3" fill="url(#g1)" opacity=".7"/><rect x="268" y="214" width="24" height="18" rx="3" fill="#2c422e"/>
+        </g>
+        <g>
+          <rect x="350" y="200" width="80" height="50" rx="8" fill="url(#g2)" stroke="#a3e635" stroke-opacity=".5"/>
+          <circle cx="368" cy="256" r="8" fill="#0e1610" stroke="#a3e635"/><circle cx="412" cy="256" r="8" fill="#0e1610" stroke="#a3e635"/>
+          <rect x="366" y="186" width="48" height="14" rx="4" fill="#141f15" stroke="#2c422e"/>
+          <rect x="376" y="212" width="28" height="16" rx="3" fill="url(#g1)" opacity=".7"/>
+          <line x1="330" y1="230" x2="348" y2="230" stroke="#a3e635" stroke-width="2" stroke-dasharray="4 4" opacity=".6"/>
+        </g>
+        <g opacity=".9">
+          <path d="M30 40 L60 40 M45 25 L45 55" stroke="#a3e635" stroke-width="2" opacity=".4"/>
+          <circle cx="430" cy="60" r="3" fill="#a3e635" opacity=".6"/><circle cx="455" cy="110" r="2" fill="#a3e635" opacity=".4"/><circle cx="405" cy="30" r="2" fill="#a3e635" opacity=".5"/>
+        </g>
+      </svg>
+    </div>
+    <div class="panel p-8 lg:p-10 relative">
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-11 h-11 rounded-xl flex items-center justify-center" style="background:var(--accent-soft);border:1px solid var(--accent)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        </div>
+        <div>
+          <div class="text-lg font-extrabold tracking-tight">YESI-FULFILLMENT<span class="text-acc glow-text">WMS</span></div>
+          <div class="text-xs text-muted">Fulfillment Cloud · v4.2 Orion</div>
+        </div>
+      </div>
+      <h1 class="text-2xl font-bold mb-1">Welcome back, Operator</h1>
+      <p class="text-sm text-muted mb-7">Sign in to your fulfillment control tower.</p>
+      <label class="text-xs font-semibold text-muted block mb-1.5">WORK EMAIL</label>
+      <input id="loginEmail" class="input mb-4" placeholder="ops@verdant.cloud" value="ops@verdant.cloud">
+      <label class="text-xs font-semibold text-muted block mb-1.5">PASSWORD</label>
+      <input id="loginPass" type="password" class="input mb-6" placeholder="••••••••" value="demo1234">
+      <button class="btn btn-primary w-full justify-center mb-3" onclick="enterApp()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Launch Control Tower
+      </button>
+      <button class="btn btn-ghost w-full justify-center" onclick="enterApp()">Explore Live Demo →</button>
+      <div class="mt-6 pt-5 border-t hair flex items-center justify-between text-xs text-faint">
+        <span>SOC 2 · ISO 27001 · 99.99% SLA</span>
+        <span class="mono">DC-EAST-02</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div id="app" class="hidden min-h-screen flex">
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="w-[248px] flex-none h-screen sticky top-0 flex flex-col border-r hair" style="background:var(--bg2)">
+    <div class="p-5 flex items-center gap-3">
+      <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-none" style="background:var(--accent-soft);border:1px solid var(--accent)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      </div>
+      <div>
+        <div class="font-extrabold text-sm tracking-wide">YESI-FULFILLMENT<span class="text-acc">WMS</span></div>
+        <div class="text-[10px] text-faint mono">DC-EAST-02</div>
+      </div>
+    </div>
+    <div class="px-4 mb-3">
+      <div class="panel-2 px-3 py-2.5 flex items-center gap-2 text-xs text-faint cursor-pointer hover:text-muted transition" onclick="openCmdk()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>Search or command…</span>
+        <span class="ml-auto mono text-[10px] px-1.5 py-0.5 rounded border hair">⌘K</span>
+      </div>
+    </div>
+    <nav id="navList" class="flex-1 overflow-y-auto px-4 space-y-1">
+      <div class="text-[10px] font-bold tracking-widest text-faint px-3 pt-3 pb-1">OPERATIONS</div>
+      <div class="nav-item active" data-view="dashboard" onclick="navigate('dashboard')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Control Tower</div>
+      <div class="nav-item" data-view="orders" onclick="navigate('orders')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>Orders <span id="navOrderBadge" class="ml-auto chip" style="background:var(--accent-soft);color:var(--accent)">0</span></div>
+      <div class="nav-item" data-view="inventory" onclick="navigate('inventory')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>Inventory</div>
+      <div class="nav-item" data-view="receiving" onclick="navigate('receiving')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Receiving & ASN</div>
+      <div class="nav-item" data-view="picking" onclick="navigate('picking')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Waves & Picking</div>
+      <div class="nav-item" data-view="shipping" onclick="navigate('shipping')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Shipping & Docks</div>
+      <div class="text-[10px] font-bold tracking-widest text-faint px-3 pt-4 pb-1">FACILITY</div>
+      <div class="nav-item" data-view="locations" onclick="navigate('locations')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Locations Map</div>
+      <div class="nav-item" data-view="workers" onclick="navigate('workers')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Workforce</div>
+      <div class="nav-item" data-view="analytics" onclick="navigate('analytics')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</div>
+      <div class="nav-item" data-view="settings" onclick="navigate('settings')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</div>
+    </nav>
+    <div class="p-4">
+      <div class="panel-2 p-4 relative overflow-hidden">
+        <div class="absolute -right-6 -top-6 w-20 h-20 rounded-full" style="background:var(--accent-soft)"></div>
+        <div class="flex items-center gap-2 mb-1"><div class="pulse-dot"></div><span class="text-[11px] font-bold text-acc">SYSTEMS NOMINAL</span></div>
+        <div class="text-[11px] text-muted leading-relaxed">All conveyors, scanners &amp; AMRs online. Latency <span class="mono text-acc" id="latencyVal">12ms</span></div>
+      </div>
+    </div>
+  </aside>
+  <div id="sidebarBackdrop" class="fixed inset-0 bg-black/60 z-[85] hidden lg:hidden" onclick="toggleMobileNav(false)"></div>
+
+  <!-- MAIN -->
+  <div class="flex-1 min-w-0 flex flex-col">
+    <!-- TOPBAR -->
+    <header class="sticky top-0 z-50 border-b hair flex items-center gap-3 px-4 lg:px-6 h-16" style="background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(12px)">
+      <button class="lg:hidden btn-ghost btn !p-2" onclick="toggleMobileNav(true)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div>
+        <h1 id="pageTitle" class="text-base font-bold leading-tight">Control Tower</h1>
+        <div id="pageSub" class="text-[11px] text-faint">Realtime fulfillment intelligence</div>
+      </div>
+      <div class="ml-auto flex items-center gap-2">
+        <div class="hidden md:flex items-center gap-2 chip" style="background:var(--accent-soft);color:var(--accent)"><div class="pulse-dot"></div>LIVE · <span id="clock" class="mono">--:--:--</span></div>
+        <button class="btn btn-ghost !p-2.5" title="Toggle theme" onclick="toggleTheme()"><span id="themeIcon"></span></button>
+        <div class="relative">
+          <button class="btn btn-ghost !p-2.5 relative" onclick="toggleDropdown(event,'notifDrop')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style="background:var(--bad)"></span></button>
+          <div id="notifDrop" class="dropdown">
+            <div class="px-4 py-3 border-b hair flex items-center justify-between"><span class="text-sm font-bold">Notifications</span><button class="text-[11px] text-acc font-semibold" onclick="clearNotifs()">Mark all read</button></div>
+            <div id="notifList" class="max-h-80 overflow-y-auto"></div>
+          </div>
+        </div>
+        <button class="btn btn-primary hidden sm:inline-flex" onclick="openModal('waveModal')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Wave
+        </button>
+        <div class="flex items-center gap-2.5 pl-2 ml-1 border-l hair">
+          <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm" style="background:linear-gradient(135deg,var(--accent2),var(--accent));color:var(--accent-ink)">AR</div>
+          <div class="hidden lg:block leading-tight"><div class="text-xs font-bold">Ava Reyes</div><div class="text-[10px] text-faint">Ops Director</div></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 p-4 lg:p-6 overflow-x-hidden">
+
+      <!-- ================= DASHBOARD ================= -->
+      <section id="view-dashboard" class="view active space-y-5">
+        <div class="grid grid-cols-2 xl:grid-cols-4 gap-4">
+          <div class="panel kpi-card p-5"><div class="flex items-start justify-between"><span class="text-[11px] font-bold tracking-wider text-faint">ORDERS TODAY</span><span class="chip" style="background:rgba(74,222,128,.12);color:var(--good)">▲ 12.4%</span></div><div class="text-3xl font-extrabold mt-2 mono" id="kpiOrders">1,284</div><div class="text-[11px] text-muted mt-1">vs 1,142 yesterday</div><div class="bar-track mt-3"><div class="bar-fill" style="width:82%"></div></div></div>
+          <div class="panel kpi-card p-5"><div class="flex items-start justify-between"><span class="text-[11px] font-bold tracking-wider text-faint">ON-TIME SHIP</span><span class="chip" style="background:rgba(74,222,128,.12);color:var(--good)">▲ 0.6%</span></div><div class="text-3xl font-extrabold mt-2 mono text-acc">98.2%</div><div class="text-[11px] text-muted mt-1">SLA target 97.0%</div><div class="bar-track mt-3"><div class="bar-fill" style="width:98%"></div></div></div>
+          <div class="panel kpi-card p-5"><div class="flex items-start justify-between"><span class="text-[11px] font-bold tracking-wider text-faint">UNITS PICKED</span><span class="chip" style="background:rgba(56,189,248,.12);color:var(--info)">▲ 8.1%</span></div><div class="text-3xl font-extrabold mt-2 mono" id="kpiUnits">14,920</div><div class="text-[11px] text-muted mt-1">142 units/hr avg</div><div class="bar-track mt-3"><div class="bar-fill" style="width:71%"></div></div></div>
+          <div class="panel kpi-card p-5"><div class="flex items-start justify-between"><span class="text-[11px] font-bold tracking-wider text-faint">DOCK UTILIZATION</span><span class="chip" style="background:rgba(251,191,36,.12);color:var(--warn)">▼ 2.3%</span></div><div class="text-3xl font-extrabold mt-2 mono">76%</div><div class="text-[11px] text-muted mt-1">19 of 25 doors active</div><div class="bar-track mt-3"><div class="bar-fill" style="width:76%;background:linear-gradient(90deg,var(--warn),#fde047)"></div></div></div>
+        </div>
+        <div class="grid xl:grid-cols-3 gap-4">
+          <div class="panel p-5 xl:col-span-2">
+            <div class="flex items-center justify-between mb-4"><div><h3 class="font-bold text-sm">Order Throughput</h3><p class="text-[11px] text-faint">Live · orders received vs units shipped, per interval</p></div><div class="flex gap-2"><span class="chip" style="background:var(--accent-soft);color:var(--accent)"><span class="w-2 h-2 rounded-full" style="background:var(--accent)"></span>Orders In</span><span class="chip" style="background:rgba(56,189,248,.12);color:var(--info)"><span class="w-2 h-2 rounded-full" style="background:var(--info)"></span>Units Shipped</span></div></div>
+            <div style="height:280px"><canvas id="throughputChart"></canvas></div>
+          </div>
+          <div class="panel p-5">
+            <div class="flex items-center justify-between mb-3"><h3 class="font-bold text-sm">Live Activity</h3><span class="chip" style="background:rgba(74,222,128,.12);color:var(--good)"><span class="pulse-dot"></span>Streaming</span></div>
+            <div id="activityFeed" class="space-y-2.5 max-h-[300px] overflow-y-auto pr-1"></div>
+          </div>
+        </div>
+        <div class="grid xl:grid-cols-3 gap-4">
+          <div class="panel p-5"><h3 class="font-bold text-sm mb-1">Inventory by Zone</h3><p class="text-[11px] text-faint mb-3">Unit distribution across pick zones</p><div style="height:220px"><canvas id="zoneChart"></canvas></div></div>
+          <div class="panel p-5"><h3 class="font-bold text-sm mb-1">Carrier On-Time %</h3><p class="text-[11px] text-faint mb-3">Rolling 30-day performance</p><div style="height:220px"><canvas id="carrierChart"></canvas></div></div>
+          <div class="panel p-5">
+            <div class="flex items-center justify-between mb-3"><h3 class="font-bold text-sm">Priority Task Queue</h3><span class="text-[11px] text-faint mono" id="taskCount">0 open</span></div>
+            <div id="taskList" class="space-y-2"></div>
+          </div>
+        </div>
+        <div class="panel p-5">
+          <div class="flex items-center justify-between mb-4"><h3 class="font-bold text-sm">Inbound Dock Schedule — Today</h3><button class="btn btn-soft !py-1.5 !px-3 text-xs" onclick="navigate('shipping')">Dock Board →</button></div>
+          <div class="overflow-x-auto"><table class="dt"><thead><tr><th>Trailer</th><th>Carrier</th><th>Door</th><th>ETA</th><th>Type</th><th>Status</th><th>Progress</th></tr></thead><tbody id="dockTable"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- ================= ORDERS ================= -->
+      <section id="view-orders" class="view space-y-5">
+        <div id="pipeline" class="grid grid-cols-3 md:grid-cols-7 gap-3"></div>
+        <div class="panel p-4 flex flex-wrap gap-3 items-center">
+          <div class="relative flex-1 min-w-[220px]">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-faint" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="orderSearch" class="input !pl-9" placeholder="Search order #, customer, SKU…" oninput="orderPage=1;renderOrders()">
+          </div>
+          <select id="orderChannel" class="input !w-auto" onchange="orderPage=1;renderOrders()"><option value="">All Channels</option><option>Shopify</option><option>Amazon</option><option>Walmart</option><option>DTC Web</option><option>B2B EDI</option></select>
+          <select id="orderPriority" class="input !w-auto" onchange="orderPage=1;renderOrders()"><option value="">All Priorities</option><option>Express</option><option>Standard</option><option>Economy</option></select>
+          <button class="btn btn-soft" onclick="autoAllocate()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Auto-Allocate</button>
+        </div>
+        <div class="panel overflow-hidden">
+          <div class="overflow-x-auto"><table class="dt"><thead><tr>
+            <th data-sort="id" onclick="sortOrders('id')">Order ↕</th><th data-sort="customer" onclick="sortOrders('customer')">Customer ↕</th><th>Channel</th><th data-sort="items" onclick="sortOrders('items')">Items ↕</th><th data-sort="value" onclick="sortOrders('value')">Value ↕</th><th>Priority</th><th>Status</th><th data-sort="sla" onclick="sortOrders('sla')">SLA ↕</th><th>Wave</th><th>Action</th>
+          </tr></thead><tbody id="ordersBody"></tbody></table></div>
+          <div class="flex items-center justify-between px-4 py-3 border-t hair text-xs text-muted">
+            <span id="ordersInfo"></span>
+            <div class="flex gap-2"><button class="btn btn-ghost !py-1.5 !px-3" onclick="ordersPage(-1)">← Prev</button><span class="mono py-1.5" id="ordersPageLbl"></span><button class="btn btn-ghost !py-1.5 !px-3" onclick="ordersPage(1)">Next →</button></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= INVENTORY ================= -->
+      <section id="view-inventory" class="view space-y-5">
+        <div id="catCards" class="grid grid-cols-2 md:grid-cols-5 gap-4"></div>
+        <div class="panel p-4 flex flex-wrap gap-3 items-center">
+          <div class="relative flex-1 min-w-[200px]">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-faint" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="invSearch" class="input !pl-9" placeholder="Search SKU or product…" oninput="invPage=1;renderInventory()">
+          </div>
+          <select id="invCat" class="input !w-auto" onchange="invPage=1;renderInventory()"><option value="">All Categories</option><option>Electronics</option><option>Apparel</option><option>Home & Living</option><option>Beauty</option><option>Grocery</option></select>
+          <label class="flex items-center gap-2 text-xs font-semibold text-muted cursor-pointer"><div class="switch" id="lowStockSwitch" onclick="this.classList.toggle('on');invPage=1;renderInventory()"></div>Low stock only</label>
+          <button class="btn btn-soft" onclick="toast('Cycle-count worksheet generated for 24 SKUs','good')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Start Cycle Count</button>
+        </div>
+        <div class="panel overflow-hidden">
+          <div class="overflow-x-auto"><table class="dt"><thead><tr><th>SKU</th><th>Product</th><th>Category</th><th>Zone / Bin</th><th>On Hand</th><th>Allocated</th><th style="min-width:140px">Available</th><th>Status</th><th>Action</th></tr></thead><tbody id="invBody"></tbody></table></div>
+          <div class="flex items-center justify-between px-4 py-3 border-t hair text-xs text-muted">
+            <span id="invInfo"></span>
+            <div class="flex gap-2"><button class="btn btn-ghost !py-1.5 !px-3" onclick="invPageGo(-1)">← Prev</button><span class="mono py-1.5" id="invPageLbl"></span><button class="btn btn-ghost !py-1.5 !px-3" onclick="invPageGo(1)">Next →</button></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= RECEIVING ================= -->
+      <section id="view-receiving" class="view space-y-5">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="panel p-4 flex items-center gap-3"><div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:var(--accent-soft);color:var(--accent)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><div><div class="text-xl font-extrabold mono" id="rcvExpected">0</div><div class="text-[11px] text-faint">ASNs Expected</div></div></div>
+          <div class="panel p-4 flex items-center gap-3"><div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(56,189,248,.12);color:var(--info)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div><div><div class="text-xl font-extrabold mono" id="rcvActive">0</div><div class="text-[11px] text-faint">At Dock Now</div></div></div>
+          <div class="panel p-4 flex items-center gap-3"><div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(74,222,128,.12);color:var(--good)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div><div class="text-xl font-extrabold mono" id="rcvDone">0</div><div class="text-[11px] text-faint">Received Today</div></div></div>
+          <div class="panel p-4 flex items-center gap-3"><div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(167,139,250,.12);color:var(--violet)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div><div><div class="text-xl font-extrabold mono">94.6%</div><div class="text-[11px] text-faint">Putaway Accuracy</div></div></div>
+        </div>
+        <div class="panel overflow-hidden">
+          <div class="px-5 py-4 border-b hair flex items-center justify-between"><h3 class="font-bold text-sm">Advanced Shipping Notices (ASN)</h3><button class="btn btn-soft !py-1.5 !px-3 text-xs" onclick="toast('New ASN form pushed to vendor portal','good')">+ Add ASN</button></div>
+          <div class="overflow-x-auto"><table class="dt"><thead><tr><th>ASN #</th><th>Vendor</th><th>SKUs</th><th>Units</th><th>ETA</th><th>Door</th><th>Status</th><th style="min-width:130px">Received</th><th>Action</th></tr></thead><tbody id="asnBody"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- ================= PICKING / WAVES ================= -->
+      <section id="view-picking" class="view space-y-5">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="panel p-4"><div class="text-[11px] font-bold text-faint tracking-wider">ACTIVE WAVES</div><div class="text-2xl font-extrabold mono mt-1" id="wActive">0</div></div>
+          <div class="panel p-4"><div class="text-[11px] font-bold text-faint tracking-wider">ORDERS IN WAVES</div><div class="text-2xl font-extrabold mono mt-1 text-acc" id="wOrders">0</div></div>
+          <div class="panel p-4"><div class="text-[11px] font-bold text-faint tracking-wider">PICK LINES / HR</div><div class="text-2xl font-extrabold mono mt-1">1,046</div></div>
+          <div class="panel p-4"><div class="text-[11px] font-bold text-faint tracking-wider">AMR FLEET</div><div class="text-2xl font-extrabold mono mt-1">18<span class="text-sm text-muted">/20</span></div></div>
+        </div>
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-sm">Wave Board <span class="text-faint font-normal text-xs ml-2">drag cards to advance stages</span></h3>
+          <button class="btn btn-primary !py-2 text-xs" onclick="openModal('waveModal')">+ Create Wave</button>
+        </div>
+        <div id="kanban" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4"></div>
+      </section>
+
+      <!-- ================= SHIPPING ================= -->
+      <section id="view-shipping" class="view space-y-5">
+        <div class="grid xl:grid-cols-3 gap-4">
+          <div class="panel p-5 xl:col-span-2">
+            <div class="flex items-center justify-between mb-4"><h3 class="font-bold text-sm">Outbound Trailers</h3><button class="btn btn-soft !py-1.5 !px-3 text-xs" onclick="toast('Daily manifest transmitted to all carriers','good')">⚡ Generate Manifest</button></div>
+            <div class="overflow-x-auto"><table class="dt"><thead><tr><th>Trailer</th><th>Carrier</th><th>Lane</th><th>Orders</th><th>Seal</th><th>Departs</th><th>Status</th><th></th></tr></thead><tbody id="trailerBody"></tbody></table></div>
+          </div>
+          <div class="panel p-5">
+            <h3 class="font-bold text-sm mb-4">Dock Doors</h3>
+            <div id="dockDoors" class="grid grid-cols-5 gap-2.5"></div>
+            <div class="mt-4 pt-4 border-t hair flex flex-wrap gap-3 text-[11px] text-muted">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded" style="background:var(--accent)"></span>Loading</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded" style="background:var(--info)"></span>Scheduled</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded" style="background:var(--warn)"></span>Delayed</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded" style="background:var(--panel3)"></span>Open</span>
+            </div>
+          </div>
+        </div>
+        <div class="panel p-5">
+          <h3 class="font-bold text-sm mb-4">Carrier Rate & Performance</h3>
+          <div class="overflow-x-auto"><table class="dt"><thead><tr><th>Carrier</th><th>Service</th><th>Shipments (30d)</th><th>On-Time %</th><th>Avg Transit</th><th>Cost / Unit</th><th>Rating</th></tr></thead><tbody id="carrierBody"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- ================= LOCATIONS ================= -->
+      <section id="view-locations" class="view space-y-5">
+        <div class="grid xl:grid-cols-3 gap-4">
+          <div class="panel p-5 xl:col-span-2">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <div><h3 class="font-bold text-sm">Warehouse Slotting Map</h3><p class="text-[11px] text-faint">Click any bin to inspect · color = occupancy</p></div>
+              <div class="flex items-center gap-2 text-[11px] text-muted">Empty <div class="w-24 h-2 rounded-full" style="background:linear-gradient(90deg,var(--panel3),var(--accent))"></div> Full</div>
+            </div>
+            <div id="locMap" class="space-y-5"></div>
+          </div>
+          <div class="space-y-4">
+            <div class="panel p-5">
+              <h3 class="font-bold text-sm mb-4">Facility Snapshot</h3>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="panel-2 p-3 text-center"><div class="text-xl font-extrabold mono" id="locTotal">0</div><div class="text-[10px] text-faint">TOTAL BINS</div></div>
+                <div class="panel-2 p-3 text-center"><div class="text-xl font-extrabold mono text-acc" id="locOcc">0</div><div class="text-[10px] text-faint">OCCUPIED</div></div>
+                <div class="panel-2 p-3 text-center"><div class="text-xl font-extrabold mono" id="locEmpty">0</div><div class="text-[10px] text-faint">EMPTY</div></div>
+                <div class="panel-2 p-3 text-center"><div class="text-xl font-extrabold mono" id="locCap">0%</div><div class="text-[10px] text-faint">CAPACITY</div></div>
+              </div>
+            </div>
+            <div class="panel p-5" id="locDetail">
+              <h3 class="font-bold text-sm mb-2">Bin Inspector</h3>
+              <div class="text-xs text-faint py-8 text-center">Select a bin on the map to inspect its contents, LPN and slotting health.</div>
+            </div>
+            <div class="panel p-5">
+              <h3 class="font-bold text-sm mb-3">Slotting Recommendations</h3>
+              <div class="space-y-2.5 text-xs">
+                <div class="panel-2 p-3 flex gap-2.5"><span class="chip h-fit" style="background:rgba(251,191,36,.12);color:var(--warn)">HOT SKU</span><span class="text-muted">Move <b class="text-acc mono">ELC-4821</b> from C-04 to golden zone A-02 — 312 picks/day.</span></div>
+                <div class="panel-2 p-3 flex gap-2.5"><span class="chip h-fit" style="background:rgba(56,189,248,.12);color:var(--info)">CONSOLIDATE</span><span class="text-muted">Merge split lots of <b class="mono text-acc">APR-1177</b> in B-07 → single bin.</span></div>
+                <div class="panel-2 p-3 flex gap-2.5"><span class="chip h-fit" style="background:rgba(74,222,128,.12);color:var(--good)">SPACE</span><span class="text-muted">Zone D lane 03 freed 14 bins after putaway wave.</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= WORKERS ================= -->
+      <section id="view-workers" class="view space-y-5">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="panel p-4"><div class="text-[11px] font-bold text-faint tracking-wider">ON SHIFT</div><div class="text-2xl font-extrabold mono mt-1">42 <span class="text-sm text-muted">/ 58</span></div></div>
+          <div class="panel p-4"><div class="text-[11px] font-bold text-faint tracking-wider">TASKS COMPLETED</div><div class="text-2xl font-extrabold mono mt-1 text-acc">2,148</div></div>
+          <div class="panel p-4"><div class="text-[11px] font-bold text-faint tracking-wider">AVG ACCURACY</div><div class="text-2xl font-extrabold mono mt-1">99.4%</div></div>
+          <div class="panel p-4"><div class="text-[11px] font-bold text-faint tracking-wider">LABOR UTILIZATION</div><div class="text-2xl font-extrabold mono mt-1">87%</div></div>
+        </div>
+        <div class="panel overflow-hidden">
+          <div class="px-5 py-4 border-b hair flex items-center justify-between"><h3 class="font-bold text-sm">Performance Leaderboard — Current Shift</h3><select class="input !w-auto !py-1.5 text-xs"><option>All Roles</option><option>Pickers</option><option>Packers</option><option>Receivers</option><option>AMR Ops</option></select></div>
+          <div class="overflow-x-auto"><table class="dt"><thead><tr><th>#</th><th>Associate</th><th>Role</th><th>Zone</th><th>Tasks/hr</th><th>Accuracy</th><th>Uptime</th><th>Status</th></tr></thead><tbody id="workerBody"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- ================= ANALYTICS ================= -->
+      <section id="view-analytics" class="view space-y-5">
+        <div class="grid xl:grid-cols-2 gap-4">
+          <div class="panel p-5"><h3 class="font-bold text-sm mb-1">Order Volume — 14 Days</h3><p class="text-[11px] text-faint mb-3">Received vs fulfilled</p><div style="height:260px"><canvas id="volumeChart"></canvas></div></div>
+          <div class="panel p-5"><h3 class="font-bold text-sm mb-1">Fulfillment Cycle Time</h3><p class="text-[11px] text-faint mb-3">Hours from order drop to trailer depart</p><div style="height:260px"><canvas id="cycleChart"></canvas></div></div>
+        </div>
+        <div class="grid xl:grid-cols-3 gap-4">
+          <div class="panel p-5"><h3 class="font-bold text-sm mb-1">Order Status Mix</h3><p class="text-[11px] text-faint mb-3">All open + closed today</p><div style="height:240px"><canvas id="mixChart"></canvas></div></div>
+          <div class="panel p-5 xl:col-span-2">
+            <h3 class="font-bold text-sm mb-1">Top SKUs by Pick Velocity</h3><p class="text-[11px] text-faint mb-3">Units picked in last 7 days</p>
+            <div class="overflow-x-auto"><table class="dt"><thead><tr><th>Rank</th><th>SKU</th><th>Product</th><th>Units Picked</th><th>Fill Rate</th><th>Trend</th></tr></thead><tbody id="topSkuBody"></tbody></table></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SETTINGS ================= -->
+      <section id="view-settings" class="view space-y-5 max-w-4xl">
+        <div class="panel p-6">
+          <h3 class="font-bold text-sm mb-5">Appearance</h3>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="panel-2 p-4 cursor-pointer theme-opt" data-t="dark" onclick="setTheme('dark')"><div class="flex items-center justify-between mb-3"><span class="text-sm font-bold">Midnight Green</span><span class="chip theme-badge-dark" style="background:var(--accent-soft);color:var(--accent)">Default</span></div><div class="h-16 rounded-lg border hair" style="background:#0a120b"><div class="flex gap-1.5 p-2"><div class="w-8 h-full rounded" style="background:#a3e635;opacity:.6"></div><div class="w-8 h-full rounded" style="background:#1a2a1b"></div><div class="w-8 h-full rounded" style="background:#1a2a1b"></div></div></div></div>
+            <div class="panel-2 p-4 cursor-pointer theme-opt" data-t="light" onclick="setTheme('light')"><div class="flex items-center justify-between mb-3"><span class="text-sm font-bold">Daylight Lime</span><span class="chip theme-badge-light" style="background:var(--accent-soft);color:var(--accent)">Light</span></div><div class="h-16 rounded-lg border hair" style="background:#f2f7ef"><div class="flex gap-1.5 p-2"><div class="w-8 h-full rounded" style="background:#84cc16;opacity:.7"></div><div class="w-8 h-full rounded" style="background:#e2ecda"></div><div class="w-8 h-full rounded" style="background:#e2ecda"></div></div></div></div>
+          </div>
+          <div class="mt-5 flex items-center justify-between panel-2 p-4"><div><div class="text-sm font-bold">Compact Table Density</div><div class="text-[11px] text-faint">Reduces row height across all data grids</div></div><div class="switch" id="densitySwitch" onclick="this.classList.toggle('on');document.body.classList.toggle('compact');toast('Table density updated','good')"></div></div>
+        </div>
+        <div class="panel p-6">
+          <h3 class="font-bold text-sm mb-5">Notifications & Alerts</h3>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between panel-2 p-4"><div><div class="text-sm font-bold">SLA breach warnings</div><div class="text-[11px] text-faint">Alert 45 min before cutoff</div></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="flex items-center justify-between panel-2 p-4"><div><div class="text-sm font-bold">Low-stock & reorder triggers</div><div class="text-[11px] text-faint">When available ≤ reorder point</div></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="flex items-center justify-between panel-2 p-4"><div><div class="text-sm font-bold">AMR / conveyor fault alerts</div><div class="text-[11px] text-faint">Push to floor supervisors</div></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="flex items-center justify-between panel-2 p-4"><div><div class="text-sm font-bold">Daily digest email</div><div class="text-[11px] text-faint">06:00 ops summary</div></div><div class="switch" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+        </div>
+        <div class="panel p-6">
+          <h3 class="font-bold text-sm mb-5">Facility Profile</h3>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div><label class="text-xs font-semibold text-muted block mb-1.5">FACILITY NAME</label><input class="input" value="Verdant East Fulfillment Center 02"></div>
+            <div><label class="text-xs font-semibold text-muted block mb-1.5">CODE</label><input class="input mono" value="DC-EAST-02"></div>
+            <div><label class="text-xs font-semibold text-muted block mb-1.5">TIMEZONE</label><select class="input"><option>America/New_York (EST)</option><option>America/Chicago (CST)</option></select></div>
+            <div><label class="text-xs font-semibold text-muted block mb-1.5">DEFAULT CUTOFF</label><input class="input mono" value="17:30"></div>
+          </div>
+          <div class="mt-5 flex gap-3"><button class="btn btn-primary" onclick="toast('Facility profile saved & synced to WCS','good')">Save Changes</button><button class="btn btn-ghost" onclick="toast('Changes discarded','warn')">Cancel</button></div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- ============ ORDER DRAWER ============ -->
+<div id="drawerBackdrop" class="fixed inset-0 bg-black/50 z-[65] hidden" onclick="closeDrawer()"></div>
+<aside class="drawer" id="orderDrawer">
+  <div class="px-6 py-4 border-b hair flex items-center justify-between flex-none">
+    <div><div class="text-[11px] text-faint font-bold tracking-wider">ORDER DETAIL</div><div class="font-extrabold mono text-lg" id="dwId">—</div></div>
+    <button class="btn btn-ghost !p-2" onclick="closeDrawer()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="flex-1 overflow-y-auto px-6 py-5 space-y-6" id="drawerContent"></div>
+  <div class="px-6 py-4 border-t hair flex gap-3 flex-none" id="drawerActions"></div>
+</aside>
+
+<!-- ============ MODALS ============ -->
+<div class="modal-wrap" id="waveModal">
+  <div class="modal p-6">
+    <div class="flex items-center justify-between mb-5"><h3 class="font-extrabold text-lg">Create Pick Wave</h3><button class="btn btn-ghost !p-2" onclick="closeModal('waveModal')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="grid grid-cols-2 gap-4 mb-4">
+      <div><label class="text-xs font-semibold text-muted block mb-1.5">WAVE TYPE</label><select id="waveType" class="input"><option>Single Order</option><option>Batch Pick</option><option>Zone Pick & Pass</option><option>Cluster (AMR)</option></select></div>
+      <div><label class="text-xs font-semibold text-muted block mb-1.5">PRIORITY</label><select id="wavePri" class="input"><option>Standard</option><option>Express</option><option>Critical SLA</option></select></div>
+      <div><label class="text-xs font-semibold text-muted block mb-1.5">ZONE</label><select id="waveZone" class="input"><option>Zone A — Eaches</option><option>Zone B — Apparel</option><option>Zone C — Electronics</option><option>Zone D — Bulk</option></select></div>
+      <div><label class="text-xs font-semibold text-muted block mb-1.5">ASSIGNED PICKER</label><select id="wavePicker" class="input"></select></div>
+    </div>
+    <div class="mb-5"><label class="text-xs font-semibold text-muted block mb-1.5">ORDERS TO RELEASE</label><input id="waveOrders" class="input mono" type="number" min="1" max="200" value="24"><div class="text-[11px] text-faint mt-1.5"><span id="wavePending" class="text-acc font-bold">0</span> allocated orders currently pending release</div></div>
+    <div class="flex gap-3"><button class="btn btn-primary flex-1 justify-center" onclick="createWave()">⚡ Release Wave</button><button class="btn btn-ghost" onclick="closeModal('waveModal')">Cancel</button></div>
+  </div>
+</div>
+
+<div class="modal-wrap" id="receiveModal">
+  <div class="modal p-6">
+    <div class="flex items-center justify-between mb-5"><h3 class="font-extrabold text-lg">Receive Inbound ASN</h3><button class="btn btn-ghost !p-2" onclick="closeModal('receiveModal')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div id="receiveInfo" class="panel-2 p-4 mb-4 text-sm space-y-1.5"></div>
+    <div class="mb-4"><label class="text-xs font-semibold text-muted block mb-1.5">UNITS RECEIVED THIS SCAN</label><input id="receiveQty" class="input mono" type="number" min="1"></div>
+    <div class="mb-5"><label class="text-xs font-semibold text-muted block mb-1.5">CONDITION</label><select class="input"><option>Good — saleable</option><option>Damaged — quarantine</option><option>Overage — hold for vendor</option></select></div>
+    <div class="flex gap-3"><button class="btn btn-primary flex-1 justify-center" onclick="confirmReceive()">Confirm & Putaway</button><button class="btn btn-ghost" onclick="closeModal('receiveModal')">Cancel</button></div>
+  </div>
+</div>
+
+<div class="modal-wrap" id="adjustModal">
+  <div class="modal p-6">
+    <div class="flex items-center justify-between mb-5"><h3 class="font-extrabold text-lg">Inventory Adjustment</h3><button class="btn btn-ghost !p-2" onclick="closeModal('adjustModal')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div id="adjustInfo" class="panel-2 p-4 mb-4 text-sm space-y-1.5"></div>
+    <div class="grid grid-cols-2 gap-4 mb-5">
+      <div><label class="text-xs font-semibold text-muted block mb-1.5">COUNTED QTY</label><input id="adjustQty" class="input mono" type="number" min="0"></div>
+      <div><label class="text-xs font-semibold text-muted block mb-1.5">REASON CODE</label><select id="adjustReason" class="input"><option>Cycle count variance</option><option>Damaged write-off</option><option>Lost / found</option><option>Vendor short-ship</option></select></div>
+    </div>
+    <div class="flex gap-3"><button class="btn btn-primary flex-1 justify-center" onclick="confirmAdjust()">Apply Adjustment</button><button class="btn btn-ghost" onclick="closeModal('adjustModal')">Cancel</button></div>
+  </div>
+</div>
+
+<!-- ============ COMMAND PALETTE ============ -->
+<div id="cmdk" onclick="if(event.target===this)closeCmdk()">
+  <div class="panel w-full max-w-xl mx-4 overflow-hidden" style="box-shadow:var(--shadow)">
+    <div class="flex items-center gap-3 px-4 border-b hair">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="cmdInput" class="!bg-transparent !border-0 !shadow-none px-0 py-4 text-sm flex-1 outline-none" style="color:var(--text)" placeholder="Type a command or search…" oninput="filterCmds()">
+      <span class="mono text-[10px] text-faint px-1.5 py-0.5 rounded border hair">ESC</span>
+    </div>
+    <div id="cmdList" class="p-2 max-h-80 overflow-y-auto"></div>
+  </div>
+</div>
+
+<!-- ============ TOASTS ============ -->
+<div id="toasts" class="fixed bottom-5 right-5 z-[120] space-y-2.5"></div>
+
+<script>
+/* ================= UTILS ================= */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const rnd=mulberry32(20261118);
+const ri=(a,b)=>Math.floor(rnd()*(b-a+1))+a;
+const pick=a=>a[Math.floor(rnd()*a.length)];
+const fmt=n=>n.toLocaleString('en-US');
+const money=n=>'$'+n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
+
+const STATUS={
+ 'Pending':{c:'var(--faint)',bg:'rgba(148,163,184,.12)'},
+ 'Allocated':{c:'var(--info)',bg:'rgba(56,189,248,.12)'},
+ 'Picking':{c:'var(--violet)',bg:'rgba(167,139,250,.14)'},
+ 'Packing':{c:'var(--warn)',bg:'rgba(251,191,36,.12)'},
+ 'Ready to Ship':{c:'var(--accent)',bg:'var(--accent-soft)'},
+ 'Shipped':{c:'var(--good)',bg:'rgba(74,222,128,.12)'},
+ 'Delivered':{c:'var(--good)',bg:'rgba(74,222,128,.08)'}
+};
+function chip(text,c,bg){return `<span class="chip" style="background:${bg};color:${c}">${text}</span>`}
+function statusChip(s){const st=STATUS[s]||STATUS.Pending;return chip(s,st.c,st.bg)}
+
+/* ================= DATA ================= */
+const customers=['Nordwind Retail','Apex Mart','Lumina Store','BrightCart Co.','Peak Supply','Urban Nest','SilverLine Goods','GreenBasket','Helix Outfitters','Cobalt & Co.','Riverbend Trade','Nova Marketplace'];
+const channels=['Shopify','Amazon','Walmart','DTC Web','B2B EDI'];
+const statuses=['Pending','Allocated','Picking','Packing','Ready to Ship','Shipped','Delivered'];
+const priorities=['Express','Standard','Economy'];
+const catSkus={
+ 'Electronics':[['ELC-4821','Aurora Wireless Earbuds Pro'],['ELC-2210','Nimbus 65W GaN Charger'],['ELC-3390','Pulse Fitness Band X2'],['ELC-1188','Lumen 4K Action Cam'],['ELC-5567','Orbit Bluetooth Speaker']],
+ 'Apparel':[['APR-1177','Trailhead Merino Tee'],['APR-2245','Summit Fleece Hoodie'],['APR-3309','Drift Chino Pants'],['APR-4412','Cloudstep Crew Socks 3pk'],['APR-5523','Ridgeline Rain Shell']],
+ 'Home & Living':[['HML-2201','Terra Ceramic Mug Set'],['HML-3345','Glow Smart LED Strip 5m'],['HML-4478','Nook Linen Throw Blanket'],['HML-5590','Pure Mist Humidifier'],['HML-6612','Oakline Cutting Board']],
+ 'Beauty':[['BTY-1120','Verdane Vitamin-C Serum'],['BTY-2233','Silkpath Hair Oil'],['BTY-3344','Mineral SPF 50 Fluid'],['BTY-4455','Rosewater Mist Toner'],['BTY-5566','Charcoal Clay Mask']],
+ 'Grocery':[['GRC-2211','Cold Brew Concentrate 6pk'],['GRC-3322','Wild Honey Reserve Jar'],['GRC-4433','Matcha Ceremonial Tin'],['GRC-5544','Protein Crunch Bars 12ct']]
+};
+const zones=['A','B','C','D'];
+const orders=[];
+for(let i=0;i<58;i++){
+  const st=statuses[i<6?0:i<16?1:i<26?2:i<34?3:i<42?4:i<50?5:6];
+  orders.push({id:'SO-'+(104820+i),customer:pick(customers),channel:pick(channels),items:ri(1,9),value:ri(24,1450),priority:pick(priorities),status:st,sla:ri(20,2400),wave:st==='Pending'||st==='Allocated'?'—':'WV-'+ri(1040,1099),
+  lines:Array.from({length:ri(1,4)},()=>{const c=pick(Object.keys(catSkus));const s=pick(catSkus[c]);return{sku:s[0],name:s[1],qty:ri(1,6),price:ri(9,299)}})});
+}
+const inventory=[];
+Object.entries(catSkus).forEach(([cat,list])=>{
+  list.forEach(([sku,name],idx)=>{
+    const onHand=ri(40,2400), allocated=Math.floor(onHand*(rnd()*.5)), reorder=ri(100,300);
+    inventory.push({sku,name,cat,onHand,allocated,reorder,zone:pick(zones),bin:String(ri(1,9)).padStart(2,'0')+'-'+String(ri(1,40)).padStart(3,'0'),vel:ri(20,340)});
+  });
+});
+const asns=[
+ {id:'ASN-88412',vendor:'Aurora Electronics Ltd',skus:12,units:4800,eta:'Today 09:30',door:'D-04',status:'Receiving',rx:2140},
+ {id:'ASN-88427',vendor:'Trailhead Apparel Co',skus:8,units:2600,eta:'Today 11:15',door:'D-11',status:'At Dock',rx:600},
+ {id:'ASN-88433',vendor:'Nook Home Goods',skus:15,units:3150,eta:'Today 13:45',door:'D-07',status:'Expected',rx:0},
+ {id:'ASN-88441',vendor:'Verdane Beauty Labs',skus:6,units:1800,eta:'Today 15:00',door:'D-02',status:'Expected',rx:0},
+ {id:'ASN-88456',vendor:'GreenBasket Foods',skus:20,units:6200,eta:'Tomorrow 07:00',door:'—',status:'Expected',rx:0},
+ {id:'ASN-88402',vendor:'Lumen Optics',skus:4,units:950,eta:'Today 06:40',door:'D-09',status:'Putaway',rx:950},
+ {id:'ASN-88390',vendor:'Cobalt Supply Group',skus:11,units:3700,eta:'Yesterday',door:'D-05',status:'Received',rx:3700},
+];
+const waves=[
+ {id:'WV-1092',orders:36,zone:'A',picker:'M. Chen',lines:214,pri:'Express',col:'progress'},
+ {id:'WV-1093',orders:24,zone:'C',picker:'D. Okafor',lines:167,pri:'Standard',col:'progress'},
+ {id:'WV-1094',orders:48,zone:'B',picker:'AMR Fleet 2',lines:301,pri:'Standard',col:'released'},
+ {id:'WV-1095',orders:18,zone:'D',picker:'S. Patel',lines:96,pri:'Critical SLA',col:'released'},
+ {id:'WV-1096',orders:30,zone:'A',picker:'Unassigned',lines:180,pri:'Standard',col:'planned'},
+ {id:'WV-1097',orders:12,zone:'C',picker:'Unassigned',lines:74,pri:'Express',col:'planned'},
+ {id:'WV-1088',orders:40,zone:'B',picker:'L. Romano',lines:255,pri:'Standard',col:'done'},
+ {id:'WV-1089',orders:22,zone:'A',picker:'J. Whitaker',lines:132,pri:'Express',col:'done'},
+ {id:'WV-1090',orders:55,zone:'D',picker:'AMR Fleet 1',lines:389,pri:'Standard',col:'done'},
+];
+const KCOLS=[['planned','Planned','var(--faint)'],['released','Released','var(--info)'],['progress','In Progress','var(--warn)'],['done','Completed','var(--good)']];
+const workers=[
+ ['M. Chen','Picker','A',168,99.7,'Active'],['D. Okafor','Picker','C',151,99.2,'Active'],['L. Romano','Packer','B',142,99.9,'Active'],
+ ['S. Patel','Picker','D',138,98.8,'Active'],['J. Whitaker','Picker','A',133,99.5,'Active'],['R. Torres','Receiver','Inbound',121,99.1,'Active'],
+ ['K. Nguyen','Packer','B',118,99.8,'Break'],['A. Brooks','AMR Ops','Floor',112,99.4,'Active'],['P. Ivanov','Packer','A',104,98.6,'Active'],
+ ['T. Nakamura','Receiver','Inbound',97,99.3,'Active'],['G. Silva','Picker','C',92,98.2,'Off-shift'],['H. Meyer','QC Lead','All',88,99.9,'Active']
+];
+const trailers=[
+ ['TLR-7741','FastFreight XPO','EAST → ATL HUB',182,'SL8841204','16:30','Loading'],['TLR-7742','SwiftLine LTL','EAST → ORD',240,'SL8841350','17:00','Scheduled'],
+ ['TLR-7738','GreenRoad Parcel','LOCAL LAST-MILE',410,'SL8841187','15:45','Loading'],['TLR-7735','TransContinental','EAST → DFW',156,'SL8841022','14:20','Departed'],
+ ['TLR-7746','SwiftLine LTL','EAST → LAX',204,'SL8841488','19:00','Scheduled'],['TLR-7731','FastFreight XPO','EAST → MIA',133,'SL8840955','12:10','Delayed']];
+const carriers=[
+ ['GreenRoad Parcel','Ground Last-Mile','18,420','99.1','1.2 d','$2.14','★★★★★'],
+ ['SwiftLine LTL','Regional LTL','9,860','98.4','2.4 d','$3.86','★★★★★'],
+ ['FastFreight XPO','Linehaul FTL','6,240','97.2','3.1 d','$5.02','★★★★☆'],
+ ['TransContinental','National Ground','11,305','95.8','4.2 d','$4.41','★★★★☆'],
+ ['AeroDash Express','2-Day Air','3,120','93.6','1.9 d','$11.20','★★★☆☆']];
+const docks=Array.from({length:6},()=>({id:'D-'+String(ri(1,25)).padStart(2,'0'),carrier:pick(['FastFreight','SwiftLine','GreenRoad','TransCont','—']),eta:String(ri(6,20))+':'+pick(['00','15','30','45']),type:pick(['Inbound','Outbound']),status:pick(['Loading','Scheduled','Delayed','Unloading','Scheduled','Open'])}));
+let tasks=[
+ {t:'Clear quarantine pallet LPN-4491 at Q-02',done:false,tag:'QC'},{t:'Reprint labels for wave WV-1092 (2 void)',done:false,tag:'PACK'},
+ {t:'Approve overtime for Zone B evening shift',done:false,tag:'LABOR'},{t:'Resolve short-ship on ASN-88390 (12 u)',done:true,tag:'RCV'},
+ {t:'AMR #7 battery swap at station 3',done:true,tag:'AMR'},{t:'Cycle count zone C aisle 04',done:false,tag:'INV'}];
+let feed=[
+ {i:'📦',t:'WV-1092 pick confirmed — 214 lines',a:'2m ago'},{i:'🚚',t:'TLR-7735 departed for DFW hub',a:'6m ago'},
+ {i:'✅',t:'ASN-88402 fully received (950 u)',a:'12m ago'},{i:'⚡',t:'AMR Fleet 2 released to Zone B',a:'18m ago'},
+ {i:'🔔',t:'Low stock: BTY-3344 below reorder pt',a:'25m ago'},{i:'📥',t:'41 new orders imported from Shopify',a:'31m ago'}];
+let notifs=[
+ {t:'SLA warning: SO-104838 cutoff in 42 min',s:'High priority · Zone C',u:true},{t:'Receiving variance on ASN-88390',s:'12 units short · review needed',u:true},
+ {t:'Wave WV-1088 completed 4m early',s:'L. Romano · 99.9% accuracy',u:true},{t:'Nightly inventory snapshot ready',s:'24 SKUs flagged for cycle count',u:false}];
+let waveSeq=1098;
+
+/* ================= THEME ================= */
+function themeIcon(){return document.documentElement.dataset.theme==='dark'
+ ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
+ : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'}
+function setTheme(t){document.documentElement.dataset.theme=t;$('#themeIcon').innerHTML=themeIcon();applyChartTheme();toast(t==='dark'?'Midnight Green theme applied':'Daylight Lime theme applied','good')}
+function toggleTheme(){setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark')}
+
+/* ================= TOASTS ================= */
+function toast(msg,type='good'){
+  const icons={good:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+  warn:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="2.2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  info:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--info)" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'};
+  const el=document.createElement('div');el.className='toast';el.innerHTML=(icons[type]||icons.good)+'<span>'+msg+'</span>';
+  $('#toasts').appendChild(el);setTimeout(()=>{el.style.transition='all .3s';el.style.opacity='0';el.style.transform='translateX(40px)';setTimeout(()=>el.remove(),320)},3600);
+}
+
+/* ================= NAVIGATION ================= */
+const TITLES={dashboard:['Control Tower','Realtime fulfillment intelligence'],orders:['Order Management','Pipeline, allocation & SLA tracking'],inventory:['Inventory Control','Stock positions, bins & cycle counts'],receiving:['Receiving & ASN','Inbound flows and dock scheduling'],picking:['Waves & Picking','Release, batch and track pick waves'],shipping:['Shipping & Docks','Outbound trailers, carriers & manifests'],locations:['Locations Map','Slotting, occupancy & bin health'],workers:['Workforce','Labor performance & shift telemetry'],analytics:['Analytics','Trends, velocity & fulfillment KPIs'],settings:['Settings','Preferences & facility configuration']};
+function navigate(v){
+  $$('.view').forEach(s=>s.classList.remove('active'));
+  $('#view-'+v).classList.add('active');
+  $$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===v));
+  $('#pageTitle').textContent=TITLES[v][0];$('#pageSub').textContent=TITLES[v][1];
+  toggleMobileNav(false);
+  setTimeout(()=>{Object.values(charts).forEach(c=>{try{c.resize()}catch(e){}})},30);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toggleMobileNav(open){$('#sidebar').classList.toggle('mobile-open',open);$('#sidebarBackdrop').classList.toggle('hidden',!open)}
+
+/* ================= DROPDOWNS ================= */
+function toggleDropdown(e,id){e.stopPropagation();$$('.dropdown').forEach(d=>{if(d.id!==id)d.classList.remove('open')});$('#'+id).classList.toggle('open')}
+document.addEventListener('click',()=>{$$('.dropdown').forEach(d=>d.classList.remove('open'))});
+function renderNotifs(){$('#notifList').innerHTML=notifs.map(n=>`<div class="px-4 py-3 border-b hair flex gap-3 hover:bg-[var(--accent-soft)] cursor-pointer transition"><span class="w-2 h-2 rounded-full mt-1.5 flex-none" style="background:${n.u?'var(--accent)':'transparent'}"></span><div><div class="text-xs font-semibold leading-snug">${n.t}</div><div class="text-[11px] text-faint mt-0.5">${n.s}</div></div></div>`).join('')}
+function clearNotifs(){notifs.forEach(n=>n.u=false);renderNotifs();toast('All notifications marked as read','good')}
+
+/* ================= CHARTS ================= */
+const charts={};
+function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+function applyChartTheme(){
+  const grid=document.documentElement.dataset.theme==='dark'?'rgba(255,255,255,.05)':'rgba(0,0,0,.06)';
+  const tick=cssVar('--muted');
+  Object.values(charts).forEach(c=>{
+    if(c.options.scales)Object.values(c.options.scales).forEach(s=>{if(s.grid)s.grid.color=grid;if(s.ticks)s.ticks.color=tick;if(s.border)s.border.color='transparent'});
+    if(c.options.plugins&&c.options.plugins.legend&&c.options.plugins.legend.labels)c.options.plugins.legend.labels.color=tick;
+    if(c.options.plugins&&c.options.plugins.tooltip){c.options.plugins.tooltip.backgroundColor=cssVar('--panel2');c.options.plugins.tooltip.titleColor=cssVar('--text');c.options.plugins.tooltip.bodyColor=tick;c.options.plugins.tooltip.borderColor=cssVar('--border2');c.options.plugins.tooltip.borderWidth=1}
+    c.update('none');
+  });
+}
+function baseOpts(legend){
+  const grid=document.documentElement.dataset.theme==='dark'?'rgba(255,255,255,.05)':'rgba(0,0,0,.06)';
+  return {responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+   plugins:{legend:{display:!!legend,labels:{color:cssVar('--muted'),usePointStyle:true,pointStyleWidth:8,boxHeight:7,font:{size:11,family:"'Inter'"}}},
+   tooltip:{backgroundColor:cssVar('--panel2'),titleColor:cssVar('--text'),bodyColor:cssVar('--muted'),borderColor:cssVar('--border2'),borderWidth:1,padding:10,cornerRadius:8,displayColors:true,boxWidth:8,boxHeight:8,usePointStyle:true}},
+   scales:{x:{grid:{color:grid},border:{display:false},ticks:{color:cssVar('--muted'),font:{size:10,family:"'JetBrains Mono'"}}},y:{grid:{color:grid},border:{display:false},ticks:{color:cssVar('--muted'),font:{size:10,family:"'JetBrains Mono'"}}}}};
+}
+let tpLabels=[],tpIn=[],tpOut=[];
+(function seedTP(){const now=new Date();for(let i=19;i>=0;i--){const d=new Date(now-i*3.5*60000);tpLabels.push(d.getHours()+':'+String(d.getMinutes()).padStart(2,'0'));tpIn.push(ri(38,96));tpOut.push(ri(52,120))}})();
+function initCharts(){
+  Chart.defaults.font.family="'Inter',sans-serif";
+  const ctx=$('#throughputChart').getContext('2d');
+  const g1=ctx.createLinearGradient(0,0,0,280);g1.addColorStop(0,'rgba(163,230,53,.28)');g1.addColorStop(1,'rgba(163,230,53,0)');
+  const g2=ctx.createLinearGradient(0,0,0,280);g2.addColorStop(0,'rgba(56,189,248,.16)');g2.addColorStop(1,'rgba(56,189,248,0)');
+  charts.tp=new Chart(ctx,{type:'line',data:{labels:tpLabels,datasets:[
+    {label:'Orders In',data:tpIn,borderColor:'#a3e635',backgroundColor:g1,fill:true,tension:.4,borderWidth:2.5,pointRadius:0,pointHoverRadius:4},
+    {label:'Units Shipped',data:tpOut,borderColor:'#38bdf8',backgroundColor:g2,fill:true,tension:.4,borderWidth:2,pointRadius:0,pointHoverRadius:4,borderDash:[5,4]}]},options:baseOpts(false)});
+  charts.zone=new Chart($('#zoneChart'),{type:'doughnut',data:{labels:['Zone A · Eaches','Zone B · Apparel','Zone C · Electronics','Zone D · Bulk'],datasets:[{data:[3820,2940,2610,4180],backgroundColor:['#a3e635','#38bdf8','#a78bfa','#fbbf24'],borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{color:cssVar('--muted'),usePointStyle:true,pointStyleWidth:8,boxHeight:7,font:{size:10.5}}},tooltip:baseOpts().plugins.tooltip}}});
+  charts.carrier=new Chart($('#carrierChart'),{type:'bar',data:{labels:['GreenRoad','SwiftLine','FastFreight','TransCont','AeroDash'],datasets:[{data:[99.1,98.4,97.2,95.8,93.6],backgroundColor:['#a3e635','#84cc16','#65a30d','#4d7c0f','#3f6212'],borderRadius:6,barThickness:16}]},options:{...baseOpts(false),indexAxis:'y',scales:{x:{min:88,max:100,grid:{color:cssVar('--muted')===''?'':'rgba(128,128,128,.08)'},ticks:{color:cssVar('--muted'),font:{size:10}},border:{display:false}},y:{grid:{display:false},ticks:{color:cssVar('--muted'),font:{size:10.5,weight:'600'}},border:{display:false}}}}});
+  const days=[];for(let i=13;i>=0;i--){const d=new Date(Date.now()-i*864e5);days.push(d.toLocaleDateString('en-US',{month:'short',day:'numeric'}))}
+  charts.vol=new Chart($('#volumeChart'),{type:'bar',data:{labels:days,datasets:[
+    {label:'Received',data:days.map(()=>ri(950,1500)),backgroundColor:'rgba(163,230,53,.85)',borderRadius:5,barPercentage:.62},
+    {label:'Fulfilled',data:days.map(()=>ri(900,1450)),backgroundColor:'rgba(56,189,248,.55)',borderRadius:5,barPercentage:.62}]},options:baseOpts(true)});
+  charts.cycle=new Chart($('#cycleChart'),{type:'line',data:{labels:days,datasets:[{label:'Avg cycle hrs',data:days.map(()=>+(3+rnd()*2.6).toFixed(1)),borderColor:'#a3e635',backgroundColor:'rgba(163,230,53,.12)',fill:true,tension:.45,borderWidth:2.5,pointRadius:2.5,pointBackgroundColor:'#a3e635'}]},options:baseOpts(false)});
+  const mix={};statuses.forEach(s=>mix[s]=orders.filter(o=>o.status===s).length);
+  charts.mix=new Chart($('#mixChart'),{type:'doughnut',data:{labels:Object.keys(mix),datasets:[{data:Object.values(mix),backgroundColor:['#94a3b8','#38bdf8','#a78bfa','#fbbf24','#a3e635','#4ade80','#22c55e'],borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'right',labels:{color:cssVar('--muted'),usePointStyle:true,pointStyleWidth:8,boxHeight:7,font:{size:10.5}}},tooltip:baseOpts().plugins.tooltip}}});
+}
+
+/* ================= DASHBOARD RENDERS ================= */
+function renderFeed(){$('#activityFeed').innerHTML=feed.slice(0,9).map(f=>`<div class="panel-2 px-3 py-2.5 flex items-start gap-3"><span class="text-base leading-none mt-0.5">${f.i}</span><div class="min-w-0"><div class="text-xs font-medium leading-snug">${f.t}</div><div class="text-[10px] text-faint mono mt-1">${f.a}</div></div></div>`).join('')}
+function addFeed(icon,text){feed.unshift({i:icon,t:text,a:'just now'});if(feed.length>14)feed.pop();renderFeed()}
+function renderTasks(){
+  const open=tasks.filter(t=>!t.done).length;$('#taskCount').textContent=open+' open';
+  $('#taskList').innerHTML=tasks.map((t,i)=>`<div class="panel-2 px-3 py-2.5 flex items-center gap-3 ${t.done?'opacity-45':''}">
+    <button class="w-4.5 h-4.5 flex-none rounded-md border flex items-center justify-center transition" style="width:18px;height:18px;border-color:${t.done?'var(--accent)':'var(--border2)'};background:${t.done?'var(--accent)':'transparent'}" onclick="toggleTask(${i})">${t.done?'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0c1a05" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':''}</button>
+    <span class="text-xs flex-1 ${t.done?'line-through':''}">${t.t}</span><span class="chip" style="background:var(--accent-soft);color:var(--accent)">${t.tag}</span></div>`).join('')}
+function toggleTask(i){tasks[i].done=!tasks[i].done;renderTasks();toast(tasks[i].done?'Task marked complete':'Task reopened',tasks[i].done?'good':'info')}
+function renderDockTable(){
+  const st={Loading:'var(--accent)',Scheduled:'var(--info)',Delayed:'var(--warn)',Unloading:'var(--violet)',Open:'var(--faint)'};
+  $('#dockTable').innerHTML=docks.map(d=>`<tr><td class="mono font-semibold text-acc">${d.id}</td><td>${d.carrier}</td><td class="mono">${d.door||'—'}</td><td class="mono">${d.eta}</td><td>${d.type}</td><td>${chip(d.status,st[d.status],'color-mix(in srgb,'+st[d.status]+' 14%,transparent)')}</td>
+  <td style="min-width:110px"><div class="bar-track"><div class="bar-fill" style="width:${d.status==='Open'?0:ri(15,95)}%"></div></div></td></tr>`).join('')}
+
+/* ================= ORDERS ================= */
+let orderPage_=1,orderSort={k:null,dir:1},orderStatusFilter='';
+const PER=9;
+function filteredOrders(){
+  const q=$('#orderSearch').value.toLowerCase(),ch=$('#orderChannel').value,pr=$('#orderPriority').value;
+  let list=orders.filter(o=>(!q||o.id.toLowerCase().includes(q)||o.customer.toLowerCase().includes(q)||o.lines.some(l=>l.sku.toLowerCase().includes(q)))&&(!ch||o.channel===ch)&&(!pr||o.priority===pr)&&(!orderStatusFilter||o.status===orderStatusFilter));
+  if(orderSort.k)list=[...list].sort((a,b)=>{const x=a[orderSort.k],y=b[orderSort.k];return (typeof x==='number'?x-y:String(x).localeCompare(String(y)))*orderSort.dir});
+  return list}
+function sortOrders(k){orderSort=orderSort.k===k?{k,dir:-orderSort.dir}:{k,dir:1};renderOrders()}
+function ordersPage(d){const max=Math.max(1,Math.ceil(filteredOrders().length/PER));orderPage_=Math.min(max,Math.max(1,orderPage_+d));renderOrders()}
+function slaStr(m){if(m<60)return m+'m';return Math.floor(m/60)+'h '+(m%60)+'m'}
+function renderOrders(){
+  // pipeline
+  $('#pipeline').innerHTML=statuses.map(s=>{const n=orders.filter(o=>o.status===s).length;const st=STATUS[s];
+    return `<div class="panel p-3.5 cursor-pointer transition hover:-translate-y-0.5 ${orderStatusFilter===s?'!border-[var(--accent)]':''}" style="${orderStatusFilter===s?'border-color:var(--accent)':''}" onclick="orderStatusFilter=orderStatusFilter==='${s}'?'':'${s}';orderPage_=1;renderOrders()">
+    <div class="text-[10px] font-bold tracking-wider text-faint">${s.toUpperCase()}</div><div class="text-xl font-extrabold mono mt-1" style="color:${st.c}">${n}</div><div class="bar-track mt-2"><div style="width:${Math.min(100,n*8)}%;height:100%;border-radius:99px;background:${st.c}"></div></div></div>`}).join('');
+  $('#navOrderBadge').textContent=orders.filter(o=>o.status!=='Shipped'&&o.status!=='Delivered').length;
+  const list=filteredOrders(),max=Math.max(1,Math.ceil(list.length/PER)),pg=list.slice((orderPage_-1)*PER,orderPage_*PER);
+  const pri={Express:['var(--bad)','rgba(248,113,113,.12)'],Standard:['var(--info)','rgba(56,189,248,.12)'],Economy:['var(--muted)','rgba(148,163,184,.1)']};
+  $('#ordersBody').innerHTML=pg.map(o=>`<tr onclick="openDrawer('${o.id}')">
+    <td class="mono font-bold text-acc">${o.id}</td><td class="font-medium">${o.customer}</td>
+    <td><span class="chip" style="background:var(--accent-soft);color:var(--muted)">${o.channel}</span></td>
+    <td class="mono">${o.items}</td><td class="mono font-semibold">${money(o.value)}</td>
+    <td>${chip(o.priority,pri[o.priority][0],pri[o.priority][1])}</td><td>${statusChip(o.status)}</td>
+    <td><span class="mono text-xs ${o.sla<120?'font-bold':''}" style="color:${o.sla<120?'var(--warn)':'var(--muted)'}">${o.status==='Shipped'||o.status==='Delivered'?'—':slaStr(o.sla)}</span></td>
+    <td class="mono text-xs text-faint">${o.wave}</td>
+    <td><button class="btn btn-soft !py-1 !px-2.5 text-[11px]" onclick="event.stopPropagation();openDrawer('${o.id}')">View</button></td></tr>`).join('')||'<tr><td colspan="10" class="text-center py-10 text-faint text-sm">No orders match your filters</td></tr>';
+  $('#ordersInfo').textContent=`Showing ${list.length?((orderPage_-1)*PER+1):0}–${Math.min(orderPage_*PER,list.length)} of ${list.length} orders`;
+  $('#ordersPageLbl').textContent=`Page ${orderPage_} / ${max}`;
+}
+function autoAllocate(){
+  let n=0;orders.forEach(o=>{if(o.status==='Pending'){o.status='Allocated';n++}});
+  renderOrders();addFeed('⚡',`Auto-allocation engine released ${n} orders`);toast(n?`AI allocation complete — ${n} orders allocated to optimal zones`:'No pending orders to allocate',n?'good':'info')}
+
+/* ================= ORDER DRAWER ================= */
+let currentOrder=null;
+function openDrawer(id){
+  currentOrder=orders.find(o=>o.id===id);const o=currentOrder;if(!o)return;
+  $('#dwId').textContent=o.id;
+  const stageIdx=statuses.indexOf(o.status);
+  const steps=statuses.map((s,i)=>`<div class="flex gap-3"><div class="flex flex-col items-center"><div class="timeline-dot ${i<=stageIdx?'done':''}"></div>${i<statuses.length-1?'<div class="w-px flex-1 my-1" style="background:'+(i<stageIdx?'var(--accent)':'var(--border2)')+'"></div>':''}</div>
+    <div class="pb-4"><div class="text-xs font-bold ${i<=stageIdx?'':'text-faint'}">${s}</div><div class="text-[10px] text-faint mono">${i<stageIdx?'completed '+(stageIdx-i)*2+'h ago':i===stageIdx?'in progress now':'pending'}</div></div></div>`).join('');
+  $('#drawerContent').innerHTML=`
+   <div class="flex flex-wrap gap-2">${statusChip(o.status)}${chip(o.priority,o.priority==='Express'?'var(--bad)':'var(--info)',o.priority==='Express'?'rgba(248,113,113,.12)':'rgba(56,189,248,.12)')}<span class="chip" style="background:var(--accent-soft);color:var(--muted)">${o.channel}</span></div>
+   <div class="grid grid-cols-2 gap-3">
+     <div class="panel-2 p-3.5"><div class="text-[10px] font-bold text-faint tracking-wider">CUSTOMER</div><div class="text-sm font-bold mt-1">${o.customer}</div></div>
+     <div class="panel-2 p-3.5"><div class="text-[10px] font-bold text-faint tracking-wider">ORDER VALUE</div><div class="text-sm font-bold mt-1 mono text-acc">${money(o.value)}</div></div>
+     <div class="panel-2 p-3.5"><div class="text-[10px] font-bold text-faint tracking-wider">SLA COUNTDOWN</div><div class="text-sm font-bold mt-1 mono">${o.status==='Shipped'||o.status==='Delivered'?'Met ✓':slaStr(o.sla)}</div></div>
+     <div class="panel-2 p-3.5"><div class="text-[10px] font-bold text-faint tracking-wider">WAVE</div><div class="text-sm font-bold mt-1 mono">${o.wave}</div></div>
+   </div>
+   <div><div class="text-[11px] font-bold tracking-wider text-faint mb-2">LINE ITEMS (${o.lines.length})</div>
+     <div class="space-y-2">${o.lines.map(l=>`<div class="panel-2 p-3 flex items-center gap-3">
+       <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-none" style="background:var(--accent-soft)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/></svg></div>
+       <div class="min-w-0 flex-1"><div class="text-xs font-bold truncate">${l.name}</div><div class="text-[10px] text-faint mono">${l.sku} · qty ${l.qty} · ${money(l.price)} ea</div></div>
+       <span class="chip" style="background:rgba(74,222,128,.1);color:var(--good)">In stock</span></div>`).join('')}</div></div>
+   <div><div class="text-[11px] font-bold tracking-wider text-faint mb-3">FULFILLMENT TIMELINE</div>${steps}</div>`;
+  const next=statuses[Math.min(statuses.length-1,stageIdx+1)];
+  $('#drawerActions').innerHTML=`
+   <button class="btn btn-primary flex-1 justify-center" ${stageIdx>=statuses.length-1?'disabled style="opacity:.4"':''} onclick="advanceOrder()">${stageIdx>=statuses.length-1?'Lifecycle complete':'Advance → '+next}</button>
+   <button class="btn btn-ghost" onclick="toast('Pick ticket PDF sent to station printer','good')">🖨 Ticket</button>
+   <button class="btn btn-ghost" onclick="toast('Shipping label queued — Zebra ZT411','good')">Label</button>`;
+  $('#orderDrawer').classList.add('open');$('#drawerBackdrop').classList.remove('hidden');
+}
+function advanceOrder(){
+  if(!currentOrder)return;const i=statuses.indexOf(currentOrder.status);
+  if(i<statuses.length-1){currentOrder.status=statuses[i+1];
+    if(currentOrder.status==='Picking'&&currentOrder.wave==='—')currentOrder.wave='WV-'+(1090+ri(2,9));
+    addFeed('📦',`${currentOrder.id} → ${currentOrder.status}`);
+    toast(`${currentOrder.id} advanced to "${currentOrder.status}"`,'good');renderOrders();openDrawer(currentOrder.id);
+    if(charts.mix){const mix={};statuses.forEach(s=>mix[s]=orders.filter(o=>o.status===s).length);charts.mix.data.datasets[0].data=Object.values(mix);charts.mix.update()}}
+}
+function closeDrawer(){$('#orderDrawer').classList.remove('open');$('#drawerBackdrop').classList.add('hidden');currentOrder=null}
+
+/* ================= INVENTORY ================= */
+let invPage=1;const INV_PER=8;
+function invAvail(it){return it.onHand-it.allocated}
+function invStatus(it){const a=invAvail(it);return a<=0?['Out of Stock','var(--bad)','rgba(248,113,113,.12)']:a<=it.reorder?['Low Stock','var(--warn)','rgba(251,191,36,.12)']:['Healthy','var(--good)','rgba(74,222,128,.1)']}
+function catArt(cat){
+  const arts={
+   'Electronics':'<rect x="7" y="4" width="10" height="16" rx="2.5" fill="none" stroke="var(--accent)" stroke-width="1.6"/><circle cx="12" cy="16.5" r="1.3" fill="var(--accent)"/><line x1="10" y1="6.5" x2="14" y2="6.5" stroke="var(--accent)" stroke-width="1.4"/>',
+   'Apparel':'<path d="M8 4 L4 7 L6 10 L7 9 V20 H17 V9 L18 10 L20 7 L16 4 C15 5.5 9 5.5 8 4 Z" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linejoin="round"/>',
+   'Home & Living':'<path d="M4 11 L12 4 L20 11 V20 H4 Z" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linejoin="round"/><rect x="10" y="14" width="4" height="6" fill="none" stroke="var(--accent)" stroke-width="1.4"/>',
+   'Beauty':'<path d="M9 8 H15 V19 C15 20.1 14.1 21 13 21 H11 C9.9 21 9 20.1 9 19 Z" fill="none" stroke="var(--accent)" stroke-width="1.6"/><rect x="10.5" y="3" width="3" height="5" rx="1" fill="none" stroke="var(--accent)" stroke-width="1.4"/>',
+   'Grocery':'<path d="M5 8 H19 L17.5 20 H6.5 Z" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8 V6 C9 4.3 10.3 3 12 3 C13.7 3 15 4.3 15 6 V8" fill="none" stroke="var(--accent)" stroke-width="1.4"/>'};
+  return `<svg width="26" height="26" viewBox="0 0 24 24">${arts[cat]}</svg>`}
+function renderInventory(){
+  const cats=Object.keys(catSkus);
+  $('#catCards').innerHTML=cats.map(c=>{const items=inventory.filter(i=>i.cat===c);const units=items.reduce((s,i)=>s+i.onHand,0);const low=items.filter(i=>invAvail(i)<=i.reorder).length;
+    return `<div class="panel p-4 flex items-center gap-3.5 cursor-pointer kpi-card" onclick="document.getElementById('invCat').value='${c}';invPage=1;renderInventory()">
+    <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-none" style="background:var(--accent-soft);border:1px solid var(--border2)">${catArt(c)}</div>
+    <div class="min-w-0"><div class="text-xs font-bold truncate">${c}</div><div class="text-[11px] text-faint mono mt-0.5">${fmt(units)} units · ${items.length} SKUs</div>${low?`<div class="text-[10px] font-bold mt-1" style="color:var(--warn)">⚠ ${low} low stock</div>`:''}</div></div>`}).join('');
+  const q=$('#invSearch').value.toLowerCase(),cat=$('#invCat').value,lowOnly=$('#lowStockSwitch').classList.contains('on');
+  let list=inventory.filter(i=>(!q||i.sku.toLowerCase().includes(q)||i.name.toLowerCase().includes(q))&&(!cat||i.cat===cat)&&(!lowOnly||invAvail(i)<=i.reorder));
+  const max=Math.max(1,Math.ceil(list.length/INV_PER)),pg=list.slice((invPage-1)*INV_PER,invPage*INV_PER);
+  $('#invBody').innerHTML=pg.map(i=>{const av=invAvail(i),st=invStatus(i),pct=Math.min(100,Math.round(av/(i.reorder*4)*100));
+    return `<tr onclick="openAdjust('${i.sku}')"><td class="mono font-bold text-acc">${i.sku}</td><td class="font-medium">${i.name}</td>
+    <td><span class="chip" style="background:var(--accent-soft);color:var(--muted)">${i.cat}</span></td>
+    <td class="mono text-xs">${i.zone}-${i.bin}</td><td class="mono">${fmt(i.onHand)}</td><td class="mono text-faint">${fmt(i.allocated)}</td>
+    <td><div class="flex items-center gap-2"><span class="mono text-xs font-bold" style="min-width:40px">${fmt(av)}</span><div class="bar-track flex-1"><div class="bar-fill" style="width:${pct}%;${st[0]!=='Healthy'?'background:linear-gradient(90deg,var(--warn),#fde047)':''}"></div></div></div></td>
+    <td>${chip(st[0],st[1],st[2])}</td>
+    <td><button class="btn btn-ghost !py-1 !px-2.5 text-[11px]" onclick="event.stopPropagation();openAdjust('${i.sku}')">Adjust</button></td></tr>`}).join('')||'<tr><td colspan="9" class="text-center py-10 text-faint text-sm">No SKUs match</td></tr>';
+  $('#invInfo').textContent=`${list.length} SKUs · total value ${money(list.reduce((s,i)=>s+i.onHand*ri(4,90),0))}`;
+  $('#invPageLbl').textContent=`Page ${invPage} / ${max}`;}
+function invPageGo(d){const q=$('#invSearch').value.toLowerCase(),cat=$('#invCat').value,lowOnly=$('#lowStockSwitch').classList.contains('on');
+  const n=inventory.filter(i=>(!q||i.sku.toLowerCase().includes(q)||i.name.toLowerCase().includes(q))&&(!cat||i.cat===cat)&&(!lowOnly||invAvail(i)<=i.reorder)).length;
+  invPage=Math.min(Math.max(1,Math.ceil(n/INV_PER)),Math.max(1,invPage+d));renderInventory()}
+let adjustSku=null;
+function openAdjust(sku){adjustSku=sku;const i=inventory.find(x=>x.sku===sku);
+  $('#adjustInfo').innerHTML=`<div class="flex justify-between"><span class="text-muted">SKU</span><b class="mono text-acc">${i.sku}</b></div>
+   <div class="flex justify-between"><span class="text-muted">Product</span><b>${i.name}</b></div>
+   <div class="flex justify-between"><span class="text-muted">System on-hand</span><b class="mono">${fmt(i.onHand)}</b></div>
+   <div class="flex justify-between"><span class="text-muted">Bin</span><b class="mono">${i.zone}-${i.bin}</b></div>`;
+  $('#adjustQty').value=i.onHand;openModal('adjustModal')}
+function confirmAdjust(){
+  const i=inventory.find(x=>x.sku===adjustSku);const q=parseInt($('#adjustQty').value||0);const diff=q-i.onHand;i.onHand=q;
+  closeModal('adjustModal');renderInventory();addFeed('🧮',`Count adjustment ${diff>=0?'+':''}${diff} u on ${i.sku}`);
+  toast(`${i.sku} adjusted by ${diff>=0?'+':''}${diff} units (${($('#adjustReason').value)})`,diff<0?'warn':'good')}
+
+/* ================= RECEIVING ================= */
+function renderASNs(){
+  const stc={'Expected':'var(--faint)','At Dock':'var(--info)','Receiving':'var(--warn)','Received':'var(--good)','Putaway':'var(--violet)'};
+  $('#asnBody').innerHTML=asns.map((a,idx)=>{const pct=Math.round(a.rx/a.units*100);
+   return `<tr><td class="mono font-bold text-acc">${a.id}</td><td class="font-medium">${a.vendor}</td><td class="mono">${a.skus}</td><td class="mono">${fmt(a.units)}</td><td class="mono text-xs">${a.eta}</td><td class="mono text-xs">${a.door}</td>
+   <td>${chip(a.status,stc[a.status],'color-mix(in srgb,'+stc[a.status]+' 13%,transparent)')}</td>
+   <td><div class="flex items-center gap-2"><div class="bar-track flex-1"><div class="bar-fill" style="width:${pct}%"></div></div><span class="mono text-[10px] text-faint">${pct}%</span></div></td>
+   <td>${a.status==='Received'||a.status==='Putaway'?'<span class="text-[11px] text-faint">—</span>':`<button class="btn btn-soft !py-1 !px-2.5 text-[11px]" onclick="openReceive(${idx})">Receive</button>`}</td></tr>`}).join('');
+  $('#rcvExpected').textContent=asns.filter(a=>a.status==='Expected').length;
+  $('#rcvActive').textContent=asns.filter(a=>a.status==='At Dock'||a.status==='Receiving').length;
+  $('#rcvDone').textContent=asns.filter(a=>a.status==='Received'||a.status==='Putaway').length}
+let recvIdx=null;
+function openReceive(idx){recvIdx=idx;const a=asns[idx];
+  $('#receiveInfo').innerHTML=`<div class="flex justify-between"><span class="text-muted">ASN</span><b class="mono text-acc">${a.id}</b></div>
+   <div class="flex justify-between"><span class="text-muted">Vendor</span><b>${a.vendor}</b></div>
+   <div class="flex justify-between"><span class="text-muted">Expected / received</span><b class="mono">${fmt(a.units)} u · ${fmt(a.rx)} rx</b></div>`;
+  $('#receiveQty').value=a.units-a.rx;openModal('receiveModal')}
+function confirmReceive(){
+  const a=asns[recvIdx];const q=Math.min(parseInt($('#receiveQty').value||0),a.units-a.rx);a.rx+=q;
+  if(a.rx>=a.units){a.status='Received';addFeed('✅',`${a.id} fully received from ${a.vendor}`)}else{a.status='Receiving';addFeed('📥',`${fmt(q)} units scanned on ${a.id}`)}
+  closeModal('receiveModal');renderASNs();toast(`${fmt(q)} units received on ${a.id} — putaway tasks generated`,'good')}
+
+/* ================= KANBAN ================= */
+function renderKanban(){
+  $('#kanban').innerHTML=KCOLS.map(([key,label,color])=>{
+    const cards=waves.filter(w=>w.col===key);
+    return `<div class="kanban-col p-3" data-col="${key}" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="dropWave(event,'${key}')">
+     <div class="flex items-center justify-between px-1.5 pb-3"><span class="text-xs font-extrabold tracking-wide flex items-center gap-2"><span class="w-2 h-2 rounded-full" style="background:${color}"></span>${label.toUpperCase()}</span><span class="mono text-[11px] text-faint">${cards.length}</span></div>
+     <div class="space-y-2.5">${cards.map(w=>`<div class="kanban-card" draggable="true" data-wave="${w.id}" ondragstart="dragWave(event,'${w.id}')" ondragend="this.classList.remove('dragging')">
+       <div class="flex items-center justify-between mb-2"><span class="mono text-xs font-extrabold text-acc">${w.id}</span>${chip(w.pri,w.pri==='Critical SLA'?'var(--bad)':w.pri==='Express'?'var(--warn)':'var(--muted)',w.pri==='Critical SLA'?'rgba(248,113,113,.12)':w.pri==='Express'?'rgba(251,191,36,.12)':'rgba(148,163,184,.1)')}</div>
+       <div class="text-[11px] text-muted flex justify-between mb-2"><span>Zone ${w.zone}</span><span>${w.lines} lines</span></div>
+       <div class="flex items-center justify-between"><div class="flex items-center gap-1.5"><div class="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold" style="background:var(--accent-soft);color:var(--accent)">${w.picker.split(' ').map(x=>x[0]).join('').slice(0,2)}</div><span class="text-[10px] text-faint">${w.picker}</span></div><span class="chip" style="background:var(--accent-soft);color:var(--accent)">${w.orders} ord</span></div>
+     </div>`).join('')||'<div class="text-center text-[11px] text-faint py-6 opacity-60">Drop waves here</div>'}</div></div>`}).join('');
+  $('#wActive').textContent=waves.filter(w=>w.col!=='done').length;
+  $('#wOrders').textContent=waves.reduce((s,w)=>s+w.orders,0);
+  const pending=orders.filter(o=>o.status==='Allocated').length;$('#wavePending').textContent=pending}
+let dragWaveId=null;
+function dragWave(e,id){dragWaveId=id;e.target.classList.add('dragging');e.dataTransfer.effectAllowed='move'}
+function dropWave(e,col){
+  e.preventDefault();document.querySelectorAll('.kanban-col').forEach(c=>c.classList.remove('over'));
+  const w=waves.find(x=>x.id===dragWaveId);if(!w||w.col===col)return;
+  w.col=col;renderKanban();addFeed('⚡',`${w.id} moved to "${KCOLS.find(k=>k[0]===col)[1]}"`);toast(`${w.id} advanced to ${KCOLS.find(k=>k[0]===col)[1]}`,'good')}
+function createWave(){
+  const n=Math.max(1,parseInt($('#waveOrders').value)||1);waveSeq++;
+  waves.unshift({id:'WV-'+waveSeq,orders:n,zone:$('#waveZone').value[5],picker:$('#wavePicker').value,lines:n*ri(4,9),pri:$('#wavePri').value,col:'planned'});
+  closeModal('waveModal');renderKanban();addFeed('🌊',`Wave WV-${waveSeq} created · ${n} orders`);toast(`Wave WV-${waveSeq} created with ${n} orders`,'good')}
+
+/* ================= SHIPPING ================= */
+function renderShipping(){
+  const stc={'Loading':'var(--accent)','Scheduled':'var(--info)','Delayed':'var(--warn)','Departed':'var(--good)'};
+  $('#trailerBody').innerHTML=trailers.map(t=>`<tr><td class="mono font-bold text-acc">${t[0]}</td><td>${t[1]}</td><td class="mono text-xs">${t[2]}</td><td class="mono">${t[3]}</td><td class="mono text-xs text-faint">${t[4]}</td><td class="mono">${t[5]}</td>
+   <td>${chip(t[6],stc[t[6]]||'var(--faint)','color-mix(in srgb,'+(stc[t[6]]||'var(--faint)')+' 13%,transparent)')}</td>
+   <td><button class="btn btn-ghost !py-1 !px-2.5 text-[11px]" onclick="toast('Tracking packet sent for ${t[0]}','good')">Track</button></td></tr>`).join('');
+  const dst={'Loading':'var(--accent)','Scheduled':'var(--info)','Delayed':'var(--warn)','Unloading':'var(--violet)','Open':'var(--panel3)'};
+  $('#dockDoors').innerHTML=Array.from({length:25},(_,i)=>{const n=String(i+1).padStart(2,'0');const d=docks.find(x=>x.door==='D-'+n);const st=d?d.status:'Open';
+    return `<div class="loc-cell flex items-center justify-center text-[9px] mono font-bold" title="Door D-${n} · ${st}${d?' · '+d.carrier+' '+d.eta:''}" style="background:${st==='Open'?'var(--panel3)':'color-mix(in srgb,'+dst[st]+' 22%,transparent)'};color:${st==='Open'?'var(--faint)':dst[st]};border-color:var(--border)">${n}</div>`}).join('');
+  $('#carrierBody').innerHTML=carriers.map(c=>`<tr><td class="font-bold">${c[0]}</td><td class="text-muted text-xs">${c[1]}</td><td class="mono">${c[2]}</td>
+   <td><span class="mono font-bold" style="color:${parseFloat(c[3])>=97?'var(--good)':parseFloat(c[3])>=95?'var(--accent)':'var(--warn)'}">${c[3]}%</span></td>
+   <td class="mono text-xs">${c[4]}</td><td class="mono text-xs">${c[5]}</td><td class="text-xs" style="color:var(--warn)">${c[6]}</td></tr>`).join('')}
+
+/* ================= LOCATIONS ================= */
+const locData=[];
+function initLocations(){
+  zones.forEach(z=>{for(let aisle=1;aisle<=6;aisle++)for(let bay=1;bay<=10;bay++){
+    const occ=rnd()>.16, util=occ?ri(15,100):0;
+    locData.push({id:`${z}-${String(aisle).padStart(2,'0')}-${String(bay).padStart(2,'0')}`,zone:z,aisle,bay,util,
+     sku:occ?pick(inventory).sku:'—',lpn:occ?'LPN-'+ri(10000,99999):'—',temp:pick(['Ambient','Ambient','Ambient','Climate 4°C'])})}})}
+function utilColor(u){if(u===0)return 'var(--panel3)';const t=u/100;
+  return document.documentElement.dataset.theme==='dark'
+   ? `rgba(163,230,53,${.12+t*.65})`
+   : `rgba(101,163,13,${.12+t*.6})`}
+function renderLocations(){
+  $('#locMap').innerHTML=zones.map(z=>{
+    const cells=locData.filter(l=>l.zone===z);
+    return `<div><div class="flex items-center gap-2 mb-2"><span class="text-xs font-extrabold text-acc">ZONE ${z}</span><span class="text-[10px] text-faint mono">${cells.filter(c=>c.util>0).length}/${cells.length} occupied · ${z==='A'?'Eaches & fast movers':z==='B'?'Apparel':z==='C'?'Electronics & high value':'Bulk & overstock'}</span></div>
+    <div class="grid gap-1.5" style="grid-template-columns:repeat(10,minmax(0,1fr))">${cells.map(c=>`<div class="loc-cell" style="background:${utilColor(c.util)}" title="${c.id} · ${c.util}% · ${c.sku}" onclick="inspectLoc('${c.id}')"></div>`).join('')}</div></div>`}).join('');
+  const occ=locData.filter(l=>l.util>0).length;
+  $('#locTotal').textContent=locData.length;$('#locOcc').textContent=occ;$('#locEmpty').textContent=locData.length-occ;
+  $('#locCap').textContent=Math.round(occ/locData.length*100)+'%'}
+function inspectLoc(id){
+  const l=locData.find(x=>x.id===id);const it=inventory.find(i=>i.sku===l.sku);
+  $('#locDetail').innerHTML=`<h3 class="font-bold text-sm mb-3">Bin Inspector</h3>
+   <div class="flex items-center justify-between mb-3"><span class="mono font-extrabold text-lg text-acc">${l.id}</span>${l.util>0?chip('OCCUPIED','var(--accent)','var(--accent-soft)'):chip('EMPTY','var(--faint)','rgba(148,163,184,.1)')}</div>
+   <div class="space-y-2.5 text-xs">
+     <div class="flex justify-between panel-2 px-3 py-2"><span class="text-muted">LPN</span><b class="mono">${l.lpn}</b></div>
+     <div class="flex justify-between panel-2 px-3 py-2"><span class="text-muted">SKU</span><b class="mono text-acc">${l.sku}</b></div>
+     ${it?`<div class="flex justify-between panel-2 px-3 py-2"><span class="text-muted">Product</span><b class="text-right max-w-[58%]">${it.name}</b></div>`:''}
+     <div class="flex justify-between panel-2 px-3 py-2"><span class="text-muted">Environment</span><b>${l.temp}</b></div>
+     <div class="panel-2 px-3 py-2"><div class="flex justify-between mb-1.5"><span class="text-muted">Cube utilization</span><b class="mono text-acc">${l.util}%</b></div><div class="bar-track"><div class="bar-fill" style="width:${l.util}%"></div></div></div>
+   </div>
+   <div class="flex gap-2 mt-3"><button class="btn btn-soft flex-1 justify-center !py-1.5 text-xs" onclick="toast('Move task created for ${l.id}','good')">Create Move</button><button class="btn btn-ghost !py-1.5 text-xs" onclick="toast('Cycle count queued at ${l.id}','info')">Count</button></div>`}
+
+/* ================= WORKERS ================= */
+function renderWorkers(){
+  const stc={'Active':'var(--good)','Break':'var(--warn)','Off-shift':'var(--faint)'};
+  $('#workerBody').innerHTML=workers.map((w,i)=>`<tr><td class="mono font-bold ${i<3?'text-acc':'text-faint'}">${i<3?['🥇','🥈','🥉'][i]:'#'+(i+1)}</td>
+   <td><div class="flex items-center gap-2.5"><div class="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-none" style="background:var(--accent-soft);color:var(--accent)">${w[0].split(' ').map(x=>x[0]).join('')}</div><b>${w[0]}</b></div></td>
+   <td class="text-muted">${w[1]}</td><td class="mono text-xs">${w[2]}</td>
+   <td><div class="flex items-center gap-2"><div class="bar-track w-16"><div class="bar-fill" style="width:${Math.min(100,w[3]/1.8)}%"></div></div><span class="mono text-xs font-bold">${w[3]}</span></div></td>
+   <td class="mono text-xs" style="color:${w[4]>=99.5?'var(--good)':'var(--text)'}">${w[4]}%</td>
+   <td class="mono text-xs text-faint">${ri(72,98)}%</td>
+   <td>${chip(w[5],stc[w[5]],'color-mix(in srgb,'+stc[w[5]]+' 13%,transparent)')}</td></tr>`).join('')}
+function renderTopSkus(){
+  const top=[...inventory].sort((a,b)=>b.vel-a.vel).slice(0,6);
+  $('#topSkuBody').innerHTML=top.map((s,i)=>`<tr><td class="mono font-bold ${i===0?'text-acc':'text-faint'}">${i+1}</td><td class="mono font-bold text-acc">${s.sku}</td><td>${s.name}</td>
+   <td class="mono font-bold">${fmt(s.vel*7)}</td><td><div class="flex items-center gap-2"><div class="bar-track w-20"><div class="bar-fill" style="width:${ri(90,100)}%"></div></div><span class="mono text-[11px]">${(97+rnd()*2.9).toFixed(1)}%</span></div></td>
+   <td class="mono text-xs" style="color:var(--good)">▲ ${(rnd()*20).toFixed(1)}%</td></tr>`).join('')}
+
+/* ================= MODALS ================= */
+function openModal(id){$('#'+id).classList.add('open')}
+function closeModal(id){$('#'+id).classList.remove('open')}
+$$('.modal-wrap').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
+
+/* ================= COMMAND PALETTE ================= */
+const CMDS=[
+ ...Object.keys(TITLES).map(k=>({t:'Go to '+TITLES[k][0],i:'→',run:()=>navigate(k)})),
+ {t:'Toggle dark / light theme',i:'◐',run:toggleTheme},
+ {t:'Create new pick wave',i:'⚡',run:()=>openModal('waveModal')},
+ {t:'Run auto-allocation on pending orders',i:'🧠',run:()=>{navigate('orders');autoAllocate()}},
+ {t:'Generate outbound manifest',i:'🚚',run:()=>toast('Daily manifest transmitted to all carriers','good')},
+ {t:'Start cycle count worksheet',i:'🧮',run:()=>toast('Cycle-count worksheet generated for 24 SKUs','good')},
+ {t:'Show low-stock SKUs only',i:'⚠',run:()=>{navigate('inventory');$('#lowStockSwitch').classList.add('on');invPage=1;renderInventory()}},
+ {t:'Trigger warehouse system health check',i:'🩺',run:()=>toast('Health check passed — WCS, WES & AMR fleet nominal','good')}];
+let cmdSel=0,cmdFiltered=CMDS;
+function openCmdk(){$('#cmdk').classList.add('open');$('#cmdInput').value='';filterCmds();setTimeout(()=>$('#cmdInput').focus(),50)}
+function closeCmdk(){$('#cmdk').classList.remove('open')}
+function filterCmds(){
+  const q=$('#cmdInput').value.toLowerCase();cmdFiltered=CMDS.filter(c=>c.t.toLowerCase().includes(q));cmdSel=0;
+  $('#cmdList').innerHTML=cmdFiltered.map((c,i)=>`<div class="cmd-item ${i===0?'sel':''}" onclick="runCmd(${i})" onmouseenter="cmdSel=${i};highlightCmd()"><span class="w-6 text-center">${c.i}</span>${c.t}</div>`).join('')||'<div class="p-4 text-center text-xs text-faint">No matching commands</div>'}
+function highlightCmd(){$$('#cmdList .cmd-item').forEach((el,i)=>el.classList.toggle('sel',i===cmdSel))}
+function runCmd(i){const c=cmdFiltered[i];if(!c)return;closeCmdk();c.run()}
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openCmdk();return}
+  if(e.key==='Escape'){closeCmdk();closeDrawer();$$('.modal-wrap').forEach(m=>m.classList.remove('open'));$$('.dropdown').forEach(d=>d.classList.remove('open'))}
+  if($('#cmdk').classList.contains('open')){
+    if(e.key==='ArrowDown'){e.preventDefault();cmdSel=Math.min(cmdFiltered.length-1,cmdSel+1);highlightCmd()}
+    if(e.key==='ArrowUp'){e.preventDefault();cmdSel=Math.max(0,cmdSel-1);highlightCmd()}
+    if(e.key==='Enter'&&cmdFiltered[cmdSel]){e.preventDefault();runCmd(cmdSel)}}});
+
+/* ================= LIVE SIMULATION ================= */
+let kpiOrders=1284,kpiUnits=14920;
+setInterval(()=>{
+  const now=new Date();$('#clock').textContent=now.toTimeString().slice(0,8);
+  $('#latencyVal').textContent=(9+Math.round(Math.random()*8))+'ms';},1000);
+setInterval(()=>{
+  const now=new Date();tpLabels.push(now.getHours()+':'+String(now.getMinutes()).padStart(2,'0'));tpIn.push(ri(38,96));tpOut.push(ri(52,120));
+  if(tpLabels.length>20){tpLabels.shift();tpIn.shift();tpOut.shift()}
+  if(charts.tp){charts.tp.data.labels=tpLabels;charts.tp.data.datasets[0].data=tpIn;charts.tp.data.datasets[1].data=tpOut;charts.tp.update('none')}
+  kpiOrders+=ri(0,3);kpiUnits+=ri(4,22);
+  $('#kpiOrders').textContent=fmt(kpiOrders);$('#kpiUnits').textContent=fmt(kpiUnits);
+},3500);
+const simEvents=[['📦','Batch pick confirmed in Zone A — 46 lines'],['🤖','AMR #12 rerouted around congestion at C-06'],['🚚','Carrier scan: 18 parcels on TLR-7738'],['📥','Shopify webhook: 6 new orders imported'],['✅','Pack station 4 closed 12 orders'],['🔋','AMR #5 docked for fast-charge (82%)'],['🧮','Cycle count variance cleared at B-03'],['⚡','Wave WV-1094 released to floor']];
+setInterval(()=>{const e=pick(simEvents);addFeed(e[0],e[1])},9000);
+setInterval(()=>{orders.forEach(o=>{if(o.sla>0&&o.status!=='Shipped'&&o.status!=='Delivered')o.sla=Math.max(0,o.sla-1)});if($('#view-orders').classList.contains('active'))renderOrders()},60000);
+
+/* ================= BOOT ================= */
+function enterApp(){
+  $('#login').classList.add('hidden');$('#app').classList.remove('hidden');
+  setTimeout(()=>$('#login').style.display='none',600);
+  if(!charts.tp)initCharts();
+  toast('Welcome back, Ava — DC-EAST-02 is live','good')}
+$('#loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')enterApp()});
+
+function boot(){
+  $('#themeIcon').innerHTML=themeIcon();
+  $('#wavePicker').innerHTML=workers.filter(w=>w[1]==='Picker'||w[1]==='AMR Ops').map(w=>`<option>${w[0]}</option>`).join('')+'<option>AMR Fleet 1</option><option>AMR Fleet 2</option>';
+  initLocations();
+  renderFeed();renderTasks();renderDockTable();renderOrders();renderInventory();renderASNs();renderKanban();renderShipping();renderLocations();renderWorkers();renderTopSkus();renderNotifs();
+  const now=new Date();$('#clock').textContent=now.toTimeString().slice(0,8);
+}
+boot();
+</script>
+</body>
+</html>

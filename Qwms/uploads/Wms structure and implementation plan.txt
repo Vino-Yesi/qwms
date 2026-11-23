@@ -1,0 +1,109 @@
+Wms - structure:
+
+Frontend:
+  React + TypeScript
+  Realtime WebSocket client
+  Accessible UI
+  Virtualized tables
+  Role-based dashboards
+
+API Layer:
+  API Gateway
+  OAuth2/OIDC
+  Rate limiting
+  OpenAPI contract
+  WebSocket gateway
+
+Domain Services:
+  OMS
+  Inventory
+  WMS
+  TMS
+  Notification
+  Analytics
+  Audit
+  Integration Hub
+
+Data:
+  PostgreSQL for transactional data
+  Redis for cache/queue locks
+  Kafka/RabbitMQ for events
+  ClickHouse for analytics
+  S3 for documents/labels/raw payloads
+
+Connectors:
+  Ozon
+  Yandex Market
+  Wildberries
+  ERP (1C/SAP/NetSuite/etc.)
+  TMS/carriers
+  AMR/WCS if needed
+
+Security:
+  MFA
+  RBAC
+  Audit logs
+  Encrypted secrets
+  Idempotency
+  Webhook signature validation
+  Least privilege service accounts
+
+Operations:
+  Prometheus
+  Grafana
+  Sentry
+  OpenTelemetry
+  Dead-letter queues
+  Replay tools
+  Reconciliation dashboards.
+
+
+
+Implementation plan :
+
+1. Real authentication
+   - OIDC / OAuth2 / SAML
+   - MFA
+   - Session timeout
+   - Role-based access control
+
+2. Backend APIs
+   - /api/v1/control-tower/kpis
+   - /api/v1/orders
+   - /api/v1/inventory
+   - /api/v1/asns
+   - /api/v1/waves
+   - /api/v1/shipments
+   - /api/v1/integrations
+   - /api/v1/audit
+
+3. Realtime channel
+   - Authenticated WebSocket ticket flow
+   - RBAC-scoped topics
+   - Event sequence IDs
+   - Reconnect/backoff
+   - Snapshot + delta synchronization
+
+4. Marketplace connectors
+   - Ozon
+   - Yandex Market
+   - Wildberries
+   - Idempotent order ingestion
+   - Raw payload storage
+   - SKU mapping exceptions
+   - Status and inventory sync
+
+5. ERP / OMS / WMS / TMS integration
+   - Canonical order model
+   - Inventory ledger
+   - Shipment/tracking sync
+   - Financial posting events
+   - Reconciliation jobs
+
+6. Security controls
+   - HTTPS only
+   - CSP headers
+   - CSRF protection
+   - Audit logs
+   - Secret management
+   - Rate limiting
